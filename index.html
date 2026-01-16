@@ -10,14 +10,17 @@
     <div id="auth">
         <div class="login-card">
             <div class="avatar-container">
-                <div class="blue-icon-box"><img src="logo.png" alt="Ship"></div>
+                <div class="blue-icon-box">
+                    <img src="logo.png" alt="Ship">
+                </div>
             </div>
+            
             <h1 class="brand-name">BlueWave</h1>
             <p class="welcome-text" id="form-subtitle">Добро пожаловать в мессенджер</p>
 
             <div class="auth-fields">
-                <input type="text" id="username" placeholder="Логин" autocomplete="off">
-                <input type="password" id="password" placeholder="Пароль">
+                <input type="text" id="username" placeholder="Логин (например, admin)" autocomplete="off">
+                <input type="password" id="password" placeholder="Пароль (например, 1234)">
                 <button id="main-btn" class="btn-primary">ВОЙТИ</button>
             </div>
             
@@ -51,14 +54,29 @@
             <div class="chat-main">
                 <div class="chat-header">
                     <span id="target-user-name">Выберите чат</span>
-                    <button id="callBtn">📞</button>
+                    <button id="callBtn" style="display: none;">📞</button>
                 </div>
-                <div id="messages"></div>
-                <div class="message-input-area">
+                
+                <div id="messages">
+                    <div id="chat-welcome">
+                        <div class="welcome-icon">💬</div>
+                        <p>Выберите группу или пользователя, чтобы начать общение</p>
+                    </div>
+                </div>
+
+                <div class="message-input-area" id="input-panel" style="display: none;">
                     <input type="text" id="msg-input" placeholder="Введите сообщение...">
                     <button id="send-btn">Отправить</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div id="video-container" style="display: none;">
+        <video id="remote-video" autoplay playsinline></video>
+        <video id="local-video" autoplay muted playsinline></video>
+        <div class="video-ui">
+            <button id="hangup-btn" class="hangup-btn">Завершить</button>
         </div>
     </div>
 

@@ -4,12 +4,11 @@ let selectedUserId = null;
 let currentChatType = 'none';
 let addedUsers = [];
 
-// Переключатель входа/регистрации (Твой оригинальный код)
+// Переключатель входа
 document.getElementById('toggle-link').onclick = () => {
     isLoginMode = !isLoginMode;
     document.getElementById('main-btn').innerText = isLoginMode ? "ВОЙТИ" : "СОЗДАТЬ АККАУНТ";
     document.getElementById('toggle-link').innerText = isLoginMode ? "Зарегистрироваться" : "Войти";
-    document.getElementById('form-subtitle').innerText = isLoginMode ? "Добро пожаловать в мессенджер" : "Регистрация нового аккаунта";
 };
 
 // Вход
@@ -23,7 +22,7 @@ document.getElementById('main-btn').onclick = () => {
     }
 };
 
-// Настройки
+// Настройки (Добавление по ID)
 document.getElementById('settings-btn').onclick = () => document.getElementById('settings-modal').style.display = 'flex';
 document.getElementById('close-settings').onclick = () => document.getElementById('settings-modal').style.display = 'none';
 
@@ -34,9 +33,10 @@ document.getElementById('confirm-add-btn').onclick = () => {
         socket.emit('refresh-users');
     }
     document.getElementById('settings-modal').style.display = 'none';
+    document.getElementById('add-user-id').value = '';
 };
 
-// Работа со списком
+// Обновление списка контактов
 socket.on('update-users', (users) => {
     const list = document.getElementById('user-list');
     list.innerHTML = '';
@@ -61,6 +61,7 @@ socket.on('update-users', (users) => {
     });
 });
 
+// Группа
 document.getElementById('global-group').onclick = () => {
     selectedUserId = 'global';
     currentChatType = 'group';
@@ -72,6 +73,7 @@ document.getElementById('global-group').onclick = () => {
     document.getElementById('global-group').classList.add('active');
 };
 
+// Сообщения
 document.getElementById('send-btn').onclick = () => {
     const text = document.getElementById('msg-input').value;
     if (!text) return;

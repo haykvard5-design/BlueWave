@@ -16,73 +16,33 @@ body, html {
     text-align: center;
 }
 
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+body, html { width: 100%; height: 100%; background-color: #007bff; display: flex; justify-content: center; align-items: center; }
+
+/* ДИЗАЙН КАРТОЧКИ (ТВОЙ) */
+.login-card { background: white; width: 360px; padding: 45px 35px; border-radius: 35px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); text-align: center; }
 .avatar-container { display: flex; justify-content: center; margin-bottom: 25px; }
-
-/* Синий квадрат с иконкой */
-.blue-icon-box {
-    width: 85px; height: 85px;
-    background: #007bff;
-    border-radius: 22px;
-    display: flex; justify-content: center; align-items: center;
-    box-shadow: 0 10px 25px rgba(0,123,255,0.3);
-}
-
-.blue-icon-box img { 
-    width: 55px; 
-    filter: brightness(0) invert(1); /* Делает твое лого белым внутри синего бокса */
-}
-
+.blue-icon-box { width: 85px; height: 85px; background: #007bff; border-radius: 22px; display: flex; justify-content: center; align-items: center; }
+.blue-icon-box img { width: 55px; filter: brightness(0) invert(1); }
 .brand-name { color: #0056b3; font-size: 32px; font-weight: 700; margin-bottom: 8px; }
-
 .welcome-text { color: #8898aa; font-size: 14px; margin-bottom: 30px; }
-
 .auth-fields { display: flex; flex-direction: column; gap: 15px; }
-
-input {
-    width: 100%;
-    padding: 15px 20px;
-    border: 1.5px solid #e9ecef;
-    border-radius: 15px;
-    background: #f8f9fe;
-    font-size: 15px;
-    outline: none;
-    transition: all 0.2s ease;
-}
-
-input:focus { border-color: #007bff; background: white; box-shadow: 0 0 0 4px rgba(0,123,255,0.1); }
-
-/* Синяя кнопка ВОЙТИ */
-.btn-primary {
-    background: #007bff;
-    color: white;
-    border: none;
-    padding: 16px;
-    border-radius: 15px;
-    font-weight: 700;
-    font-size: 16px;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: all 0.3s ease;
-}
-
-.btn-primary:hover { background: #0056b3; transform: translateY(-2px); }
-
+input { width: 100%; padding: 15px; border: 1.5px solid #e9ecef; border-radius: 15px; outline: none; background: #f8f9fe; }
+.btn-primary { background: #007bff; color: white; border: none; padding: 16px; border-radius: 15px; font-weight: 700; cursor: pointer; }
 .toggle-mode { margin-top: 25px; font-size: 13px; color: #525f7f; }
-#toggle-link { color: #007bff; cursor: pointer; font-weight: 700; margin-left: 5px; }
+#toggle-link { color: #007bff; cursor: pointer; font-weight: 700; }
 
-/* ИНТЕРФЕЙС ЧАТА */
+/* ЧАТ И САЙДБАР */
 #chat { width: 100%; height: 100%; background: #f4f5f7; }
 .app-container { display: flex; height: 100%; }
-.sidebar { width: 300px; background: white; border-right: 1px solid #e9ecef; }
-.chat-main { flex: 1; display: flex; flex-direction: column; }
-.chat-header { padding: 20px 30px; background: white; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e9ecef; }
-#messages { flex: 1; padding: 25px; overflow-y: auto; }
-.message-input-area { padding: 25px; background: white; display: flex; gap: 12px; }
-
-/* ВИДЕОЗВОНОК */
-#video-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #172b4d; z-index: 10000; }
-#local-video { position: absolute; bottom: 40px; right: 40px; width: 240px; border-radius: 20px; border: 4px solid white; box-shadow: 0 15px 35px rgba(0,0,0,0.3); }
-#remote-video { width: 100%; height: 100%; object-fit: cover; }
-.video-ui { position: absolute; bottom: 60px; width: 100%; text-align: center; }
-.hangup-btn { padding: 18px 50px; background: #f5365c; color: white; border: none; border-radius: 40px; font-weight: bold; cursor: pointer; font-size: 16px; }
+.sidebar { width: 280px; background: white; border-right: 1px solid #e9ecef; overflow-y: auto; }
+.sidebar-header { padding: 20px; border-bottom: 1px solid #eee; }
+.section-title { padding: 15px 20px 5px; font-size: 11px; text-transform: uppercase; color: #888; font-weight: bold; letter-spacing: 1px; }
+.user-item { display: flex; align-items: center; padding: 12px 20px; cursor: pointer; transition: 0.2s; }
+.user-item:hover { background: #f8f9fe; }
+.user-item.active { background: #e3f2fd; border-left: 4px solid #007bff; }
+.mini-cube { width: 35px; height: 35px; border-radius: 10px; margin-right: 12px; background: #007bff; }
+.chat-main { flex: 1; display: flex; flex-direction: column; background: white; }
+.chat-header { padding: 20px 30px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+#messages { flex: 1; padding: 20px; overflow-y: auto; background: #fafafa; }
+.message-input-area { padding: 20px; display: flex; gap: 10px; border-top: 1px solid #eee; }

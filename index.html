@@ -10,16 +10,21 @@
     <div id="auth">
         <div class="login-card">
             <div class="avatar-container">
-                <div class="blue-icon-box"><img src="logo.png" alt="Ship"></div>
+                <div class="blue-icon-box">
+                    <img src="logo.png" alt="Ship">
+                </div>
             </div>
             <h1 class="brand-name">BlueWave</h1>
-            <p class="welcome-text">Добро пожаловать</p>
+            <p class="welcome-text" id="form-subtitle">Добро пожаловать в мессенджер</p>
             <div class="auth-fields">
-                <input type="text" id="username" placeholder="Логин">
-                <input type="password" id="password" placeholder="Пароль">
+                <input type="text" id="username" placeholder="Логин (например, admin)" autocomplete="off">
+                <input type="password" id="password" placeholder="Пароль (например, 1234)">
                 <button id="main-btn" class="btn-primary">ВОЙТИ</button>
             </div>
-            <p class="toggle-mode"><span id="toggle-link">Зарегистрироваться</span></p>
+            <p class="toggle-mode">
+                <span id="toggle-text">Нет аккаунта?</span> 
+                <span id="toggle-link">Зарегистрироваться</span>
+            </p>
         </div>
     </div>
 
@@ -27,30 +32,27 @@
         <div class="app-container">
             <div class="sidebar">
                 <div class="sidebar-header">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h3>BlueWave</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="color: #0056b3;">BlueWave</h3>
                         <div id="settings-btn" style="cursor: pointer; font-size: 20px;">⚙️</div>
                     </div>
-                    <div id="my-id-display">Ваш ID: ...</div>
-                    <input type="text" id="search-input" placeholder="Поиск в контактах...">
+                    <div id="my-id-display" style="font-size: 11px; color: #007bff; margin-top: 5px;">Ваш ID: ...</div>
+                    <input type="text" id="search-input" placeholder="Поиск в контактах..." style="margin-top: 10px;">
                 </div>
-                
                 <div class="section-title">Группы</div>
                 <div class="user-item group-item" id="global-group">
                     <div class="mini-cube" style="background: #00c853;"></div> 
                     <span>BlueWave Group</span>
                 </div>
-
                 <div class="section-title">Контакты</div>
                 <div id="user-list"></div>
             </div>
-
             <div class="chat-main">
                 <div class="chat-header">
                     <span id="target-user-name">Выберите чат</span>
                 </div>
                 <div id="messages">
-                    <div id="chat-welcome">Выберите чат, чтобы начать общение</div>
+                    <div id="chat-welcome" style="text-align: center; margin-top: 50px; color: #888;">Выберите чат для начала общения</div>
                 </div>
                 <div class="message-input-area" id="input-panel" style="display: none;">
                     <input type="text" id="msg-input" placeholder="Введите сообщение...">
@@ -62,17 +64,14 @@
 
     <div id="settings-modal" class="modal">
         <div class="modal-content">
-            <h4>Настройки</h4>
-            <p style="font-size: 13px; color: #666; margin: 10px 0;">Добавить пользователя по ID:</p>
-            <input type="text" id="add-user-id" placeholder="Введите 6-значный ID...">
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button id="confirm-add-btn" class="btn-primary" style="margin:0;">Добавить</button>
-                <button id="close-settings" class="btn-primary" style="margin:0; background:#ccc;">Закрыть</button>
-            </div>
+            <h4>Добавить контакт</h4>
+            <input type="text" id="add-user-id" placeholder="Введите ID (6 символов)">
+            <button id="confirm-add-btn" class="btn-primary">Добавить</button>
+            <button id="close-settings" style="background: none; border: none; color: #888; cursor: pointer; margin-top: 10px;">Закрыть</button>
         </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
 </body>
-</html> 
+</html>

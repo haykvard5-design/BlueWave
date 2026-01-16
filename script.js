@@ -2,104 +2,92 @@ const socket = io();
 let isLoginMode = true;
 let selectedUserId = null;
 let currentChatType = 'none';
-let addedUsers = []; // Список ID, которых мы добавили
+let addedUsers = [];
 
-// Элементы настроек
-const settingsBtn = document.getElementById('settings-btn');
-const settingsModal = document.getElementById('settings-modal');
-const closeSettings = document.getElementById('close-settings');
-const confirmAddBtn = document.getElementById('confirm-add-btn');
-
-// ОТКРЫТИЕ/ЗАКРЫТИЕ НАСТРОЕК
-settingsBtn.onclick = () => settingsModal.style.display = 'flex';
-closeSettings.onclick = () => settingsModal.style.display = 'none';
-
-// ДОБАВЛЕНИЕ ПО ID
-confirmAddBtn.onclick = () => {
-    const idInput = document.getElementById('add-user-id').value.trim();
-    if (idInput.length > 0) {
-        if (!addedUsers.includes(idInput)) {
-            addedUsers.push(idInput);
-            alert("Пользователь добавлен в список!");
-            socket.emit('refresh-users'); // Запрос на обновление списка
-        }
-        document.getElementById('add-user-id').value = '';
-        settingsModal.style.display = 'none';
-    }
+// Переключатель входа/регистрации (Твой оригинальный код)
+document.getElementById('toggle-link').onclick = () => {
+    isLoginMode = !isLoginMode;
+    document.getElementById('main-btn').innerText = isLoginMode ? "ВОЙТИ" : "СОЗДАТЬ АККАУНТ";
+    document.getElementById('toggle-link').innerText = isLoginMode ? "Зарегистрироваться" : "Войти";
+    document.getElementById('form-subtitle').innerText = isLoginMode ? "Добро пожаловать в мессенджер" : "Регистрация нового аккаунта";
 };
 
-// АВТОРИЗАЦИЯ
+// Вход
 document.getElementById('main-btn').onclick = () => {
     const user = document.getElementById('username').value.trim();
     if (user) {
         socket.emit('login', { user });
         document.getElementById('auth').style.display = 'none';
         document.getElementById('chat').style.display = 'block';
+        document.getElementById('my-id-display').innerText = "Ваш ID: " + socket.id.substring(0, 6);
     }
 };
 
-socket.on('login-success', (data) => {
-    // Сокращаем socket.id до 6 символов для удобства
-    document.getElementById('my-id-display').innerText = "Ваш ID: " + socket.id.substring(0, 6);
-});
+// Настройки
+document.getElementById('settings-btn').onclick = () => document.getElementById('settings-modal').style.display = 'flex';
+document.getElementById('close-settings').onclick = () => document.getElementById('settings-modal').style.display = 'none';
 
-// ОБНОВЛЕНИЕ СПИСКА (показываем только добавленных людей или всех, если хочешь)
+document.getElementById('confirm-add-btn').onclick = () => {
+    const id = document.getElementById('add-user-id').value.trim();
+    if (id && !addedUsers.includes(id)) {
+        addedUsers.push(id);
+        socket.emit('refresh-users');
+    }
+    document.getElementById('settings-modal').style.display = 'none';
+};
+
+// Работа со списком
 socket.on('update-users', (users) => {
-    const userList = document.getElementById('user-list');
-    userList.innerHTML = '';
-    
+    const list = document.getElementById('user-list');
+    list.innerHTML = '';
     users.forEach(u => {
-        const shortId = u.id.substring(0, 6);
-        // Показываем пользователя, если его ID в нашем списке "добавленных"
-        if (u.id !== socket.id && addedUsers.includes(shortId)) {
+        const sid = u.id.substring(0, 6);
+        if (u.id !== socket.id && addedUsers.includes(sid)) {
             const div = document.createElement('div');
             div.className = 'user-item';
-            div.innerHTML = `<div class="mini-cube"></div> <span>${u.name} (ID: ${shortId})</span>`;
+            div.innerHTML = `<div class="mini-cube"></div> <span>${u.name} (ID: ${sid})</span>`;
             div.onclick = () => {
-                currentChatType = 'private';
                 selectedUserId = u.id;
+                currentChatType = 'private';
                 document.getElementById('input-panel').style.display = 'flex';
                 document.getElementById('chat-welcome').style.display = 'none';
                 document.getElementById('target-user-name').innerText = u.name;
                 document.getElementById('messages').innerHTML = '';
-                document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
+                document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
                 div.classList.add('active');
             };
-            userList.appendChild(div);
+            list.appendChild(div);
         }
     });
 });
 
-// ГРУППОВОЙ ЧАТ
 document.getElementById('global-group').onclick = () => {
-    currentChatType = 'group';
     selectedUserId = 'global';
+    currentChatType = 'group';
     document.getElementById('input-panel').style.display = 'flex';
     document.getElementById('chat-welcome').style.display = 'none';
     document.getElementById('target-user-name').innerText = "BlueWave Group";
     document.getElementById('messages').innerHTML = '';
-    document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
     document.getElementById('global-group').classList.add('active');
 };
 
-// ОТПРАВКА СООБЩЕНИЙ (как в прошлом коде)
 document.getElementById('send-btn').onclick = () => {
     const text = document.getElementById('msg-input').value;
     if (!text) return;
-    if (currentChatType === 'group') {
-        socket.emit('group-message', { text });
-    } else {
+    if (currentChatType === 'group') socket.emit('group-message', { text });
+    else {
         socket.emit('private-message', { to: selectedUserId, text });
         appendMsg("Вы", text, "my-msg");
     }
     document.getElementById('msg-input').value = '';
 };
 
-socket.on('receive-private-message', (data) => {
+socket.on('receive-private-message', data => {
     if (selectedUserId === data.from) appendMsg(data.senderName, data.text, "their-msg");
 });
 
-socket.on('receive-group-message', (data) => {
+socket.on('receive-group-message', data => {
     if (currentChatType === 'group') appendMsg(data.senderName, data.text, data.senderId === socket.id ? "my-msg" : "their-msg");
 });
 

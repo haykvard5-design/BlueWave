@@ -7,32 +7,55 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="auth-screen">
-        <div class="login-container">
-            <img src="logo.png" alt="BlueWave Ship" class="ship-img">
-            <div class="auth-box">
-                <input type="text" id="username" placeholder="Введите имя..." autocomplete="off">
-                <button id="login-btn">Войти</button>
+    <div id="auth">
+        <div class="login-card">
+            <div class="avatar-container">
+                <div class="blue-icon-box">
+                    <img src="logo.png" alt="Ship">
+                </div>
+            </div>
+            
+            <h1 class="brand-name">BlueWave</h1>
+            <p class="welcome-text" id="form-subtitle">Добро пожаловать в мессенджер</p>
+
+            <div class="auth-fields">
+                <input type="text" id="username" placeholder="Логин (например, admin)" autocomplete="off">
+                <input type="password" id="password" placeholder="Пароль (например, 1234)">
+                <button id="main-btn" class="btn-primary">ВОЙТИ</button>
+            </div>
+            
+            <p class="toggle-mode">
+                <span id="toggle-text">Нет аккаунта?</span> 
+                <span id="toggle-link">Зарегистрироваться</span>
+            </p>
+        </div>
+    </div>
+
+    <div id="chat" style="display: none;">
+        <div class="app-container">
+            <div class="sidebar">
+                <div class="sidebar-header">BlueWave</div>
+                <div id="user-list"></div>
+            </div>
+            <div class="chat-main">
+                <div class="chat-header">
+                    <span id="target-user">Общий чат</span>
+                    <button id="callBtn" class="call-action-btn">📞 Позвонить</button>
+                </div>
+                <div id="messages"></div>
+                <div class="message-input-area">
+                    <input type="text" id="msg-input" placeholder="Введите сообщение...">
+                    <button id="send-btn">Отправить</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="chat-screen" style="display: none;">
-        <div class="sidebar">
-            <h2>BlueWave</h2>
-            <div id="user-list"></div>
-        </div>
-        <div class="main-chat">
-            <div id="video-grid">
-                <video id="local-video" autoplay muted playsinline></video>
-                <video id="remote-video" autoplay playsinline></video>
-            </div>
-            <div id="messages"></div>
-            <div class="input-area">
-                <input type="text" id="msg-input" placeholder="Сообщение...">
-                <button id="send-btn">Send</button>
-                <button id="call-btn">📞</button>
-            </div>
+    <div id="video-container">
+        <video id="remote-video" autoplay playsinline></video>
+        <video id="local-video" autoplay muted playsinline></video>
+        <div class="video-ui">
+            <button id="hangup-btn" class="hangup-btn">Завершить звонок</button>
         </div>
     </div>
 

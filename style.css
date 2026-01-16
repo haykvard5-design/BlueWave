@@ -1,0 +1,81 @@
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+body, html { 
+    width: 100%; height: 100%; 
+    background-color: #007bff; /* Тот самый синий фон */
+    display: flex; justify-content: center; align-items: center;
+    overflow: hidden;
+}
+
+/* КОНТЕЙНЕР-ЯКОРЬ */
+.login-container {
+    position: relative;
+    width: 95%;
+    max-width: 500px; /* Размер твоего белого логотипа */
+}
+
+.ship-img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* ФОРМА ПОВЕРХ КОРАБЛЯ */
+.auth-box {
+    position: absolute;
+    top: 55%; /* Центрируем по вертикали относительно корабля */
+    left: 50%;
+    transform: translate(-50%, -10%);
+    width: 70%; /* Ширина полей относительно ширины корабля */
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.brand {
+    color: #000;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    background: rgba(235, 242, 255, 0.9); /* Полупрозрачный как на фото */
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    outline: none;
+    font-size: 14px;
+}
+
+.btn-login {
+    background: #0084ff;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-reg {
+    color: #0056b3;
+    font-size: 12px;
+    text-decoration: none;
+    margin-top: 5px;
+}
+
+/* СТИЛИ ЧАТА */
+#chat { width: 100%; height: 100%; background: white; }
+.messenger { display: flex; width: 100%; height: 100%; }
+.sidebar { width: 280px; border-right: 1px solid #eee; background: #fff; }
+.chat-area { flex: 1; display: flex; flex-direction: column; background: #f5f7fb; }
+.chat-header { padding: 15px; background: #fff; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+#messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.input-bar { padding: 15px; background: #fff; display: flex; gap: 10px; }
+.input-bar input[type="text"] { flex: 1; background: #f0f2f5; border: none; border-radius: 20px; padding: 10px 15px; }
+
+.my-msg { align-self: flex-end; background: #007bff; color: white; padding: 10px; border-radius: 15px 15px 2px 15px; }
+.their-msg { align-self: flex-start; background: white; border: 1px solid #ddd; padding: 10px; border-radius: 15px 15px 15px 2px; }

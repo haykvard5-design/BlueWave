@@ -1,38 +1,31 @@
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+const server = http.createServer(app);
+const io = new Server(server);
 
-app.use(express.json());
-app.use(express.static(__dirname)); 
+app.use(express.static(__dirname));
 
-let users = { 'admin': '1234' }; 
-
-app.post("/login", (req, res) => {
-    const { username, password } = req.body;
-    if (users[username] && users[username] === password) {
-        res.json({ success: true });
-    } else {
-        res.json({ success: false, error: "Неверный логин или пароль" });
-    }
-});
-
-app.post("/register", (req, res) => {
-    const { username, password } = req.body;
-    if (!username || !password) return res.json({ success: false, error: "Заполните все поля" });
-    if (users[username]) {
-        res.json({ success: false, error: "Пользователь уже существует" });
-    } else {
-        users[username] = password;
-        res.json({ success: true });
-    }
-});
+let users = {};
 
 io.on('connection', (socket) => {
-    socket.on('msg', (data) => {
-        data.time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        io.emit('msg', data); 
+    socket.on('login', (name) => {
+        users[socket.id] = name;
+        console.log(`${name} вошел в чат`);
+    });
+
+    socket.on('chat message', (msg) => {
+        io.emit('chat message', { user: users[socket.id], text: msg });
+    });
+
+    socket.on('disconnect', () => {
+        delete users[socket.id];
     });
 });
 
-http.listen(3000, () => console.log('BlueWave запущен на http://localhost:3000'));
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});

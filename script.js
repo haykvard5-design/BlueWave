@@ -2,9 +2,9 @@ const socket = io();
 let myShortId = '';
 let selectedUserId = null;
 let currentChatType = 'none';
-let addedUsers = []; // Список сохраненных ID
+let addedUsers = []; // Список ID, которые ты добавил вручную
 
-// ВХОД
+// --- АВТОРИЗАЦИЯ (Твой дизайн) ---
 document.getElementById('main-btn').onclick = () => {
     const user = document.getElementById('username').value.trim();
     if (user) {
@@ -14,91 +14,138 @@ document.getElementById('main-btn').onclick = () => {
     }
 };
 
+// Получаем твой ID от сервера при входе
 socket.on('login-success', (data) => {
     myShortId = data.id;
     document.getElementById('my-id-display').innerText = "Ваш ID: " + myShortId;
 });
 
-// МОДАЛКА
-document.getElementById('settings-btn').onclick = () => document.getElementById('settings-modal').style.display = 'flex';
-document.getElementById('close-settings').onclick = () => document.getElementById('settings-modal').style.display = 'none';
+// --- ЛОГИКА НАСТРОЕК (Шестеренка) ---
+const settingsBtn = document.getElementById('settings-btn');
+const modal = document.getElementById('settings-modal');
+const closeBtn = document.getElementById('close-settings');
+const addBtn = document.getElementById('confirm-add-btn');
 
-// ДОБАВИТЬ ID (Исправлено)
-document.getElementById('confirm-add-btn').onclick = () => {
-    const id = document.getElementById('add-user-id').value.trim();
-    if (id && id !== myShortId && !addedUsers.includes(id)) {
-        addedUsers.push(id);
-        socket.emit('refresh-users');
+settingsBtn.onclick = () => modal.style.display = 'flex';
+closeBtn.onclick = () => modal.style.display = 'none';
+
+// Добавление пользователя по ID
+addBtn.onclick = () => {
+    const targetId = document.getElementById('add-user-id').value.trim();
+    // Нельзя добавить самого себя и пустой ID
+    if (targetId && targetId !== myShortId && !addedUsers.includes(targetId)) {
+        addedUsers.push(targetId);
+        socket.emit('refresh-users'); // Запрос к серверу обновить список имен
+        alert("Пользователь " + targetId + " добавлен!");
     }
-    document.getElementById('settings-modal').style.display = 'none';
+    modal.style.display = 'none';
     document.getElementById('add-user-id').value = '';
 };
 
-// ПОИСК ПО ID (Исправлено)
+// --- ПОИСК ПО ID ---
 document.getElementById('search-input').oninput = function() {
-    const val = this.value.toLowerCase();
-    document.querySelectorAll('#user-list .user-item').forEach(item => {
-        const userId = item.getAttribute('data-id');
-        item.style.display = userId.includes(val) ? 'flex' : 'none';
+    const searchValue = this.value.toLowerCase();
+    const items = document.querySelectorAll('#user-list .user-item');
+    
+    items.forEach(item => {
+        const userId = item.getAttribute('data-id').toLowerCase();
+        if (userId.includes(searchValue)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
     });
 };
 
-// ОБНОВЛЕНИЕ КОНТАКТОВ
+// --- ОБНОВЛЕНИЕ СПИСКА КОНТАКТОВ ---
 socket.on('update-users', (users) => {
-    const list = document.getElementById('user-list');
-    list.innerHTML = '';
+    const userList = document.getElementById('user-list');
+    userList.innerHTML = ''; // Очищаем старый список
+
     users.forEach(u => {
+        // Показываем человека только если его ID в твоем списке "Добавленных"
         if (addedUsers.includes(u.shortId)) {
             const div = document.createElement('div');
             div.className = 'user-item';
-            div.setAttribute('data-id', u.shortId);
-            div.innerHTML = `<div class="mini-cube"></div> <span>${u.name} (${u.shortId})</span>`;
+            div.setAttribute('data-id', u.shortId); // Для поиска
+            div.innerHTML = `
+                <div class="mini-cube"></div> 
+                <span>${u.name} (ID: ${u.shortId})</span>
+            `;
             div.onclick = () => openChat(u.id, u.name, 'private', div);
-            list.appendChild(div);
+            userList.appendChild(div);
         }
     });
 });
 
-// ОТКРЫТИЕ ЧАТА (Включая BlueWave Group)
+// --- ОТКРЫТИЕ ЧАТА ---
 function openChat(id, name, type, element) {
     selectedUserId = id;
     currentChatType = type;
+    
+    // Показываем панель ввода
     document.getElementById('input-panel').style.display = 'flex';
     document.getElementById('chat-welcome').style.display = 'none';
     document.getElementById('target-user-name').innerText = name;
+    
+    // Очищаем окно сообщений (или можно загружать историю)
     document.getElementById('messages').innerHTML = '';
+    
+    // Подсветка активного чата
     document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
-    if(element) element.classList.add('active');
+    if (element) element.classList.add('active');
 }
 
+// Клик по BlueWave Group (Глобальный чат)
 document.getElementById('global-group').onclick = function() {
     openChat('global', 'BlueWave Group', 'group', this);
 };
 
-// ОТПРАВКА
+// --- ОТПРАВКА СООБЩЕНИЙ ---
 document.getElementById('send-btn').onclick = () => {
-    const text = document.getElementById('msg-input').value;
+    const input = document.getElementById('msg-input');
+    const text = input.value.trim();
+    
     if (!text) return;
-    if (currentChatType === 'group') socket.emit('group-message', { text });
-    else {
+
+    if (currentChatType === 'group') {
+        socket.emit('group-message', { text });
+    } else if (currentChatType === 'private') {
         socket.emit('private-message', { to: selectedUserId, text });
         appendMsg("Вы", text, "my-msg");
     }
-    document.getElementById('msg-input').value = '';
+    
+    input.value = '';
 };
 
-socket.on('receive-private-message', data => {
-    if (selectedUserId === data.from) appendMsg(data.senderName, data.text, "their-msg");
+// --- ПОЛУЧЕНИЕ СООБЩЕНИЙ ---
+socket.on('receive-private-message', (data) => {
+    if (selectedUserId === data.from) {
+        appendMsg(data.senderName, data.text, "their-msg");
+    }
 });
 
-socket.on('receive-group-message', data => {
-    if (currentChatType === 'group') appendMsg(data.senderName, data.text, data.senderId === socket.id ? "my-msg" : "their-msg");
+socket.on('receive-group-message', (data) => {
+    if (currentChatType === 'group') {
+        const type = (data.senderId === socket.id) ? "my-msg" : "their-msg";
+        appendMsg(data.senderName, data.text, type);
+    }
 });
 
+// Функция отрисовки сообщения (Пузырьки)
 function appendMsg(name, text, type) {
-    const msg = document.createElement('div');
-    msg.className = "message-row " + type;
-    msg.innerHTML = `<div class="bubble" style="padding:10px; margin:5px; border-radius:10px; background:${type==='my-msg'?'#007bff':'#eee'}; color:${type==='my-msg'?'#fff':'#000'}; width:fit-content; max-width:70%; ${type==='my-msg'?'margin-left:auto':''}"><b>${name}:</b><br>${text}</div>`;
-    document.getElementById('messages').appendChild(msg);
-    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+    const msgDiv = document.createElement('div');
+    msgDiv.className = "message-row " + type;
+    
+    // Твой стиль пузырьков
+    msgDiv.innerHTML = `
+        <div class="bubble">
+            <b>${name}</b><br>
+            ${text}
+        </div>
+    `;
+    
+    const container = document.getElementById('messages');
+    container.appendChild(msgDiv);
+    container.scrollTop = container.scrollHeight;
 }

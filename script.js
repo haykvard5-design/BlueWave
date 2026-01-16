@@ -1,74 +1,71 @@
 const socket = io();
-
 let isLoginMode = true;
+let selectedUserId = null;
 
 const mainBtn = document.getElementById('main-btn');
 const toggleLink = document.getElementById('toggle-link');
-const toggleText = document.getElementById('toggle-text');
-const formSubtitle = document.getElementById('form-subtitle');
 
-// ПЕРЕКЛЮЧЕНИЕ МЕЖДУ ВХОДОМ И РЕГИСТРАЦИЕЙ
+// 1. ПЕРЕКЛЮЧЕНИЕ: ВХОД / РЕГИСТРАЦИЯ
 toggleLink.onclick = () => {
     isLoginMode = !isLoginMode;
     mainBtn.innerText = isLoginMode ? "ВОЙТИ" : "СОЗДАТЬ АККАУНТ";
-    formSubtitle.innerText = isLoginMode ? "Добро пожаловать в мессенджер" : "Заполните данные для регистрации";
-    toggleText.innerText = isLoginMode ? "Нет аккаунта?" : "Уже есть аккаунт?";
+    document.getElementById('form-subtitle').innerText = isLoginMode ? "Добро пожаловать" : "Регистрация нового профиля";
+    document.getElementById('toggle-text').innerText = isLoginMode ? "Нет аккаунта?" : "Уже есть аккаунт?";
     toggleLink.innerText = isLoginMode ? "Зарегистрироваться" : "Войти";
 };
 
-// ОБРАБОТКА ВХОДА
+// 2. ВХОД / РЕГИСТРАЦИЯ
 mainBtn.onclick = () => {
     const user = document.getElementById('username').value.trim();
     const pass = document.getElementById('password').value.trim();
-
     if (user && pass) {
-        // Отправляем данные на сервер (server.js должен это поддерживать)
         socket.emit(isLoginMode ? 'login' : 'register', { user, pass });
-        
-        // Скрываем авторизацию и показываем чат
         document.getElementById('auth').style.display = 'none';
         document.getElementById('chat').style.display = 'block';
-        console.log("Вход под именем:", user);
-    } else {
-        alert("Пожалуйста, заполните логин и пароль!");
-    }
-}
-
-// ВИДЕОЗВОНКИ
-const callBtn = document.getElementById('callBtn');
-const videoContainer = document.getElementById('video-container');
-
-callBtn.onclick = async () => {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        videoContainer.style.display = 'flex';
-        document.getElementById('local-video').srcObject = stream;
-    } catch (e) {
-        alert("Не удалось получить доступ к камере. Убедитесь, что вы используете HTTPS.");
     }
 };
 
-document.getElementById('hangup-btn').onclick = () => {
-    const stream = document.getElementById('local-video').srcObject;
-    if (stream) stream.getTracks().forEach(track => track.stop());
-    videoContainer.style.display = 'none';
-};
+// 3. ПОИСК И ОБНОВЛЕНИЕ СПИСКА
+socket.on('update-users', (users) => {
+    const userList = document.getElementById('user-list');
+    userList.innerHTML = '';
+    users.forEach(u => {
+        if (u.id !== socket.id) {
+            const div = document.createElement('div');
+            div.className = 'user-item';
+            div.innerHTML = `<div class="mini-cube"></div> <span>${u.name}</span>`;
+            div.onclick = () => {
+                selectedUserId = u.id;
+                document.getElementById('target-user-name').innerText = u.name;
+                document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
+                div.classList.add('active');
+            };
+            userList.appendChild(div);
+        }
+    });
+});
 
-// ОТПРАВКА СООБЩЕНИЙ
+// 4. ЛИЧНЫЕ СООБЩЕНИЯ
 document.getElementById('send-btn').onclick = () => {
     const text = document.getElementById('msg-input').value;
-    if (text) {
-        socket.emit('chat message', text);
+    if (text && selectedUserId) {
+        socket.emit('private-message', { to: selectedUserId, text: text });
+        appendMessage('Вы', text, 'my-msg');
         document.getElementById('msg-input').value = '';
     }
 };
 
-socket.on('chat message', (data) => {
-    const msg = document.createElement('div');
-    msg.style.padding = "10px";
-    msg.style.marginBottom = "10px";
-    msg.style.background = "white";
-    msg.style.borderRadius = "10px";
-    msg.innerText = `${data.user || 'Я'}: ${data.text}`;
-    document.getElementById('messages').appendChild(msg);
+socket.on('receive-private-message', (data) => {
+    if (data.from === selectedUserId) {
+        appendMessage(data.senderName, data.text, 'their-msg');
+    } else {
+        alert("Новое сообщение от " + data.senderName);
+    }
 });
+
+function appendMessage(name, text, type) {
+    const msg = document.createElement('div');
+    msg.className = `msg-bubble ${type}`;
+    msg.innerHTML = `<b>${name}:</b> ${text}`;
+    document.getElementById('messages').appendChild(msg);
+}

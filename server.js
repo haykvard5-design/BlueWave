@@ -1,31 +1,37 @@
 const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
+
+let users = {}; // Тут храним подключенных людей
 
 app.use(express.static(__dirname));
 
-let users = {};
-
 io.on('connection', (socket) => {
-    socket.on('login', (name) => {
-        users[socket.id] = name;
-        console.log(`${name} вошел в чат`);
+    // При входе или регистрации сохраняем имя
+    socket.on('login', (data) => {
+        users[socket.id] = data.user;
+        io.emit('update-users', Object.entries(users).map(([id, name]) => ({id, name})));
     });
 
-    socket.on('chat message', (msg) => {
-        io.emit('chat message', { user: users[socket.id], text: msg });
+    socket.on('register', (data) => {
+        users[socket.id] = data.user;
+        io.emit('update-users', Object.entries(users).map(([id, name]) => ({id, name})));
+    });
+
+    // Отправка ЛС
+    socket.on('private-message', (data) => {
+        io.to(data.to).emit('receive-private-message', {
+            from: socket.id,
+            senderName: users[socket.id],
+            text: data.text
+        });
     });
 
     socket.on('disconnect', () => {
         delete users[socket.id];
+        io.emit('update-users', Object.entries(users).map(([id, name]) => ({id, name})));
     });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+http.listen(process.env.PORT || 3000, () => console.log('Server running...'));

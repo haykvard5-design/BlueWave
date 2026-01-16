@@ -1,42 +1,247 @@
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-body, html { width: 100%; height: 100%; background-color: #007bff; display: flex; justify-content: center; align-items: center; }
+/* ОБЩИЕ НАСТРОЙКИ */
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    font-family: sans-serif; 
+}
 
-/* ДИЗАЙН КАРТОЧКИ - СТРОГО КАК НА СКРИНШОТАХ */
-.login-card { background: white; width: 360px; padding: 40px; border-radius: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-.blue-icon-box { width: 80px; height: 80px; background: #007bff; border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; }
-.blue-icon-box img { width: 50px; filter: brightness(0) invert(1); }
-.brand-name { color: #0056b3; font-size: 28px; font-weight: bold; margin-bottom: 5px; }
-.welcome-text { color: #888; font-size: 14px; margin-bottom: 25px; }
-.auth-fields { display: flex; flex-direction: column; gap: 15px; }
-input { width: 100%; padding: 14px; border: 1.5px solid #eee; border-radius: 12px; outline: none; background: #f9f9f9; }
-.btn-primary { background: #007bff; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
-.toggle-mode { margin-top: 20px; font-size: 13px; color: #666; }
-#toggle-link { color: #007bff; cursor: pointer; font-weight: bold; }
+body, html { 
+    width: 100%; 
+    height: 100%; 
+    background-color: #007bff; /* Твой синий фон */
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    overflow: hidden; 
+}
 
-/* ЧАТ И САЙДБАР */
-#chat { width: 100%; height: 100%; background: #fff; }
-.app-container { display: flex; height: 100%; }
-.sidebar { width: 280px; background: #fdfdfd; border-right: 1px solid #eee; display: flex; flex-direction: column; }
-.sidebar-header { padding: 20px; border-bottom: 1px solid #eee; }
-.section-title { padding: 15px 20px 5px; font-size: 11px; color: #aaa; text-transform: uppercase; font-weight: bold; }
-.user-item { display: flex; align-items: center; padding: 12px 20px; cursor: pointer; }
-.user-item.active { background: #eef6ff; border-left: 4px solid #007bff; }
-.mini-cube { width: 35px; height: 35px; border-radius: 8px; background: #007bff; margin-right: 12px; }
+/* --- ТВОЯ ОРИГИНАЛЬНАЯ КАРТОЧКА РЕГИСТРАЦИИ/ВХОДА --- */
+.login-card { 
+    background: white; 
+    width: 360px; 
+    padding: 40px; 
+    border-radius: 30px; 
+    text-align: center; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+}
 
-.chat-main { flex: 1; display: flex; flex-direction: column; }
-.chat-header { padding: 20px; border-bottom: 1px solid #eee; font-weight: bold; }
-#messages { flex: 1; padding: 20px; overflow-y: auto; background: #f9f9f9; }
+.avatar-container { 
+    display: flex; 
+    justify-content: center; 
+    margin-bottom: 25px; 
+}
 
-/* МОДАЛЬНОЕ ОКНО */
-.modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-.modal-content { background: white; padding: 30px; border-radius: 20px; width: 300px; text-align: center; }
+.blue-icon-box { 
+    width: 80px; 
+    height: 80px; 
+    background: #007bff; 
+    border-radius: 20px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
 
-/* ПАНЕЛЬ ВВОДА */
-.message-input-area { padding: 20px; border-top: 1px solid #eee; display: flex; gap: 10px; }
+.blue-icon-box img { 
+    width: 50px; 
+    filter: brightness(0) invert(1); 
+}
 
-/* ПУЗЫРЬКИ */
-.message-row { display: flex; margin-bottom: 10px; }
+.brand-name { 
+    color: #0056b3; 
+    font-size: 28px; 
+    font-weight: bold; 
+    margin-bottom: 5px; 
+}
+
+.welcome-text { 
+    color: #888; 
+    font-size: 14px; 
+    margin-bottom: 25px; 
+}
+
+.auth-fields { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 15px; 
+}
+
+.auth-fields input { 
+    width: 100%; 
+    padding: 14px; 
+    border: 1.5px solid #eee; 
+    border-radius: 12px; 
+    outline: none; 
+    background: #f9f9f9; 
+}
+
+.btn-primary { 
+    background: #007bff; 
+    color: white; 
+    border: none; 
+    padding: 15px; 
+    border-radius: 12px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    transition: background 0.3s;
+}
+
+.btn-primary:hover { 
+    background: #0056b3; 
+}
+
+.toggle-mode { 
+    margin-top: 20px; 
+    font-size: 13px; 
+    color: #666; 
+}
+
+#toggle-link { 
+    color: #007bff; 
+    cursor: pointer; 
+    font-weight: bold; 
+}
+
+/* --- ИНТЕРФЕЙС ЧАТА --- */
+#chat { 
+    width: 100%; 
+    height: 100%; 
+    background: #fff; 
+}
+
+.app-container { 
+    display: flex; 
+    height: 100%; 
+}
+
+/* САЙДБАР */
+.sidebar { 
+    width: 280px; 
+    background: #fdfdfd; 
+    border-right: 1px solid #eee; 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.sidebar-header { 
+    padding: 20px; 
+    border-bottom: 1px solid #eee; 
+}
+
+#my-id-display {
+    font-size: 11px;
+    color: #007bff;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+#search-input {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    font-size: 13px;
+    outline: none;
+}
+
+.section-title { 
+    padding: 15px 20px 5px; 
+    font-size: 11px; 
+    color: #aaa; 
+    text-transform: uppercase; 
+    font-weight: bold; 
+}
+
+.user-item { 
+    display: flex; 
+    align-items: center; 
+    padding: 12px 20px; 
+    cursor: pointer; 
+    transition: background 0.2s;
+}
+
+.user-item:hover { background: #f9f9f9; }
+
+.user-item.active { 
+    background: #eef6ff; 
+    border-left: 4px solid #007bff; 
+}
+
+.mini-cube { 
+    width: 35px; 
+    height: 35px; 
+    border-radius: 8px; 
+    background: #007bff; 
+    margin-right: 12px; 
+}
+
+/* ОКНО ЧАТА */
+.chat-main { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.chat-header { 
+    padding: 20px; 
+    border-bottom: 1px solid #eee; 
+    font-weight: bold; 
+    color: #333;
+}
+
+#messages { 
+    flex: 1; 
+    padding: 20px; 
+    overflow-y: auto; 
+    background: #f9f9f9; 
+    display: flex;
+    flex-direction: column;
+}
+
+/* СООБЩЕНИЯ */
+.message-row { display: flex; margin-bottom: 10px; width: 100%; }
 .message-row.my-msg { justify-content: flex-end; }
-.bubble { padding: 10px 15px; border-radius: 15px; max-width: 70%; font-size: 14px; }
-.my-msg .bubble { background: #007bff; color: white; }
-.their-msg .bubble { background: #eee; color: #333; }
+
+.bubble { 
+    padding: 10px 15px; 
+    border-radius: 15px; 
+    max-width: 70%; 
+    font-size: 14px; 
+    line-height: 1.4;
+}
+
+.my-msg .bubble { 
+    background: #007bff; 
+    color: white; 
+    border-bottom-right-radius: 4px; 
+}
+
+.their-msg .bubble { 
+    background: #eee; 
+    color: #333; 
+    border-bottom-left-radius: 4px; 
+}
+
+/* ПАНЕЛЬ ВВОДА (ИСПРАВЛЕННОЕ ВЫРАВНИВАНИЕ) */
+.message-input-area { 
+    padding: 15px 20px; 
+    border-top: 1px solid #eee; 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    background: white;
+}
+
+.message-input-area input { 
+    flex: 1;
+    margin-bottom: 0; /* Убираем отступ */
+    padding: 12px 15px;
+    border: 1px solid #eee;
+    border-radius: 20px;
+}
+
+.message-input-area button { 
+    width: auto;
+    padding: 10px 20px;
+    border-radius: 20px;
+    height: 42px;

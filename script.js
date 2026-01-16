@@ -2,62 +2,66 @@ const socket = io();
 let isLoginMode = true;
 let selectedUserId = null;
 let currentChatType = 'none';
+let addedUsers = []; // Список ID, которых мы добавили
 
-// Элементы
-const mainBtn = document.getElementById('main-btn');
-const toggleLink = document.getElementById('toggle-link');
-const inputPanel = document.getElementById('input-panel');
-const welcomeText = document.getElementById('chat-welcome');
+// Элементы настроек
+const settingsBtn = document.getElementById('settings-btn');
+const settingsModal = document.getElementById('settings-modal');
+const closeSettings = document.getElementById('close-settings');
+const confirmAddBtn = document.getElementById('confirm-add-btn');
 
-// 1. АВТОРИЗАЦИЯ
-toggleLink.onclick = () => {
-    isLoginMode = !isLoginMode;
-    mainBtn.innerText = isLoginMode ? "ВОЙТИ" : "СОЗДАТЬ АККАУНТ";
-    document.getElementById('toggle-text').innerText = isLoginMode ? "Нет аккаунта?" : "Уже есть аккаунт?";
-    toggleLink.innerText = isLoginMode ? "Зарегистрироваться" : "Войти";
-};
+// ОТКРЫТИЕ/ЗАКРЫТИЕ НАСТРОЕК
+settingsBtn.onclick = () => settingsModal.style.display = 'flex';
+closeSettings.onclick = () => settingsModal.style.display = 'none';
 
-mainBtn.onclick = () => {
-    const user = document.getElementById('username').value.trim();
-    if (user) {
-        socket.emit(isLoginMode ? 'login' : 'register', { user });
-        document.getElementById('auth').style.display = 'none';
-        document.getElementById('chat').style.display = 'block';
-        document.getElementById('my-id-display').innerText = "Ваш ID: " + socket.id.substring(0, 6);
+// ДОБАВЛЕНИЕ ПО ID
+confirmAddBtn.onclick = () => {
+    const idInput = document.getElementById('add-user-id').value.trim();
+    if (idInput.length > 0) {
+        if (!addedUsers.includes(idInput)) {
+            addedUsers.push(idInput);
+            alert("Пользователь добавлен в список!");
+            socket.emit('refresh-users'); // Запрос на обновление списка
+        }
+        document.getElementById('add-user-id').value = '';
+        settingsModal.style.display = 'none';
     }
 };
 
-// 2. ФУНКЦИЯ ВКЛЮЧЕНИЯ ЧАТА
-function openChat(name, type, id) {
-    currentChatType = type;
-    selectedUserId = id;
-    inputPanel.style.display = 'flex';
-    welcomeText.style.display = 'none';
-    document.getElementById('target-user-name').innerText = name;
-    document.getElementById('messages').innerHTML = '';
-    document.getElementById('callBtn').style.display = (type === 'private') ? 'block' : 'none';
-}
-
-// 3. КЛИК ПО ГРУППЕ
-document.getElementById('global-group').onclick = () => {
-    openChat("BlueWave Group", "group", "global");
-    document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
-    document.getElementById('global-group').classList.add('active');
+// АВТОРИЗАЦИЯ
+document.getElementById('main-btn').onclick = () => {
+    const user = document.getElementById('username').value.trim();
+    if (user) {
+        socket.emit('login', { user });
+        document.getElementById('auth').style.display = 'none';
+        document.getElementById('chat').style.display = 'block';
+    }
 };
 
-// 4. ОБНОВЛЕНИЕ СПИСКА И ПОИСК ПО ID
+socket.on('login-success', (data) => {
+    // Сокращаем socket.id до 6 символов для удобства
+    document.getElementById('my-id-display').innerText = "Ваш ID: " + socket.id.substring(0, 6);
+});
+
+// ОБНОВЛЕНИЕ СПИСКА (показываем только добавленных людей или всех, если хочешь)
 socket.on('update-users', (users) => {
     const userList = document.getElementById('user-list');
     userList.innerHTML = '';
+    
     users.forEach(u => {
-        if (u.id !== socket.id) {
-            const shortId = u.id.substring(0, 6);
+        const shortId = u.id.substring(0, 6);
+        // Показываем пользователя, если его ID в нашем списке "добавленных"
+        if (u.id !== socket.id && addedUsers.includes(shortId)) {
             const div = document.createElement('div');
             div.className = 'user-item';
-            div.setAttribute('data-id', shortId);
             div.innerHTML = `<div class="mini-cube"></div> <span>${u.name} (ID: ${shortId})</span>`;
             div.onclick = () => {
-                openChat(u.name, "private", u.id);
+                currentChatType = 'private';
+                selectedUserId = u.id;
+                document.getElementById('input-panel').style.display = 'flex';
+                document.getElementById('chat-welcome').style.display = 'none';
+                document.getElementById('target-user-name').innerText = u.name;
+                document.getElementById('messages').innerHTML = '';
                 document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
                 div.classList.add('active');
             };
@@ -66,15 +70,19 @@ socket.on('update-users', (users) => {
     });
 });
 
-document.getElementById('search-input').oninput = function() {
-    const val = this.value.toLowerCase();
-    document.querySelectorAll('#user-list .user-item').forEach(item => {
-        const id = item.getAttribute('data-id').toLowerCase();
-        item.style.display = id.includes(val) ? 'flex' : 'none';
-    });
+// ГРУППОВОЙ ЧАТ
+document.getElementById('global-group').onclick = () => {
+    currentChatType = 'group';
+    selectedUserId = 'global';
+    document.getElementById('input-panel').style.display = 'flex';
+    document.getElementById('chat-welcome').style.display = 'none';
+    document.getElementById('target-user-name').innerText = "BlueWave Group";
+    document.getElementById('messages').innerHTML = '';
+    document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
+    document.getElementById('global-group').classList.add('active');
 };
 
-// 5. СООБЩЕНИЯ
+// ОТПРАВКА СООБЩЕНИЙ (как в прошлом коде)
 document.getElementById('send-btn').onclick = () => {
     const text = document.getElementById('msg-input').value;
     if (!text) return;

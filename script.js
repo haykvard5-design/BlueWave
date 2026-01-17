@@ -10,6 +10,7 @@ let currentLanguage = 'ru';
 let localStream = null;
 let peerConnection = null;
 let incomingCall = null;
+let allUsers = []; // Все пользователи онлайн
 
 // ПЕРЕВОДЫ
 const translations = {
@@ -33,7 +34,11 @@ const translations = {
         haveAccount: 'Уже есть аккаунт? Войти',
         noAccount: 'Нет аккаунта? Зарегистрироваться',
         loginWelcome: 'Добро пожаловать в будущее общения',
-        registerWelcome: 'Создайте новый аккаунт'
+        registerWelcome: 'Создайте новый аккаунт',
+        changeId: 'Изменить ID',
+        newId: 'Новый ID',
+        confirmChangeId: 'Изменить',
+        idChanged: 'ID успешно изменен!'
     },
     en: {
         welcomeText: 'Welcome to the future of communication',
@@ -55,7 +60,11 @@ const translations = {
         haveAccount: 'Have account? Login',
         noAccount: 'No account? Register',
         loginWelcome: 'Welcome to the future of communication',
-        registerWelcome: 'Create a new account'
+        registerWelcome: 'Create a new account',
+        changeId: 'Change ID',
+        newId: 'New ID',
+        confirmChangeId: 'Change',
+        idChanged: 'ID successfully changed!'
     }
 };
 
@@ -180,6 +189,30 @@ function initializeChat() {
         }
     };
 
+    // ИЗМЕНЕНИЕ ID
+    const changeIdBtn = document.getElementById('changeIdBtn');
+    if (changeIdBtn) {
+        changeIdBtn.onclick = () => {
+            const newId = document.getElementById('newIdInput').value.trim().toUpperCase();
+            
+            if (!newId) {
+                alert('Введите новый ID');
+                return;
+            }
+            
+            if (newId === myShortId) {
+                alert('Это ваш текущий ID');
+                return;
+            }
+            
+            myShortId = newId;
+            document.getElementById('userIdDisplay').textContent = `ID: ${myShortId}`;
+            document.getElementById('newIdInput').value = '';
+            alert(t('idChanged'));
+            socket.emit('refresh-users');
+        };
+    }
+
     // ДОБАВЛЕНИЕ КОНТАКТА
     const addContactBtn = document.getElementById('addContactBtn');
     if (addContactBtn) {
@@ -208,6 +241,49 @@ function initializeChat() {
         };
     }
 
+    // ПОИСК ПО ID
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.trim().toUpperCase();
+            const contactsList = document.getElementById('contactsList');
+
+            if (searchTerm === '') {
+                // Показываем добавленные контакты
+                socket.emit('refresh-users');
+            } else {
+                // Фильтруем все пользователей по ID
+                contactsList.innerHTML = '';
+                
+                allUsers.forEach(user => {
+                    if (user.shortId.includes(searchTerm) && user.shortId !== myShortId) {
+                        const div = document.createElement('div');
+                        div.className = 'contact-item';
+                        div.innerHTML = `
+                            <div class="contact-avatar">👤</div>
+                            <div class="contact-info">
+                                <div class="contact-name">${user.name}</div>
+                                <div class="contact-status">${user.shortId}</div>
+                            </div>
+                        `;
+                        div.onclick = () => {
+                            if (!addedContacts.includes(user.shortId)) {
+                                addedContacts.push(user.shortId);
+                            }
+                            searchInput.value = '';
+                            socket.emit('refresh-users');
+                            document.querySelectorAll('.contact-item, .group-item').forEach(el => {
+                                el.classList.remove('active');
+                            });
+                            openChat(user.socketId, user.name, 'private', user.shortId);
+                        };
+                        contactsList.appendChild(div);
+                    }
+                });
+            }
+        });
+    }
+
     // ОТПРАВКА СООБЩЕНИЯ
     const sendBtn = document.getElementById('sendBtn');
     const messageInput = document.getElementById('messageInput');
@@ -226,11 +302,11 @@ function initializeChat() {
     const globalGroupBtn = document.getElementById('globalGroupBtn');
     if (globalGroupBtn) {
         globalGroupBtn.onclick = () => {
-            openChat('global', 'BlueWave Group', 'group');
             document.querySelectorAll('.group-item, .contact-item').forEach(el => {
                 el.classList.remove('active');
             });
             globalGroupBtn.classList.add('active');
+            openChat('global', 'BlueWave Group', 'group');
         };
     }
 
@@ -377,30 +453,36 @@ socket.on('auth-success-register', (msg) => {
 
 // ОБНОВЛЕНИЕ СПИСКА КОНТАКТОВ
 socket.on('update-users', (users) => {
+    allUsers = users; // Сохраняем всех пользователей для поиска
     const contactsList = document.getElementById('contactsList');
-    contactsList.innerHTML = '';
+    const searchInput = document.getElementById('searchInput');
     
-    users.forEach(user => {
-        if (addedContacts.includes(user.shortId) && user.shortId !== myShortId) {
-            const div = document.createElement('div');
-            div.className = 'contact-item';
-            div.innerHTML = `
-                <div class="contact-avatar">👤</div>
-                <div class="contact-info">
-                    <div class="contact-name">${user.name}</div>
-                    <div class="contact-status">${user.shortId}</div>
-                </div>
-            `;
-            div.onclick = () => {
-                document.querySelectorAll('.contact-item, .group-item').forEach(el => {
-                    el.classList.remove('active');
-                });
-                div.classList.add('active');
-                openChat(user.socketId, user.name, 'private', user.shortId);
-            };
-            contactsList.appendChild(div);
-        }
-    });
+    // Если поиск пустой, показываем добавленные контакты
+    if (!searchInput || searchInput.value.trim() === '') {
+        contactsList.innerHTML = '';
+        
+        users.forEach(user => {
+            if (addedContacts.includes(user.shortId) && user.shortId !== myShortId) {
+                const div = document.createElement('div');
+                div.className = 'contact-item';
+                div.innerHTML = `
+                    <div class="contact-avatar">👤</div>
+                    <div class="contact-info">
+                        <div class="contact-name">${user.name}</div>
+                        <div class="contact-status">${user.shortId}</div>
+                    </div>
+                `;
+                div.onclick = () => {
+                    document.querySelectorAll('.contact-item, .group-item').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                    div.classList.add('active');
+                    openChat(user.socketId, user.name, 'private', user.shortId);
+                };
+                contactsList.appendChild(div);
+            }
+        });
+    }
 });
 
 // ОТКРЫТИЕ ЧАТА

@@ -15,8 +15,10 @@
         <h2>BlueWave</h2>
         <p class="welcome-text" id="welcomeText">Добро пожаловать в будущее общения</p>
         
-        <input type="text" id="username" placeholder="Имя пользователя">
-        <input type="password" id="password" placeholder="Пароль">
+        <div class="auth-fields">
+            <input type="text" id="username" placeholder="Имя пользователя">
+            <input type="password" id="password" placeholder="Пароль">
+        </div>
         
         <button class="btn-primary" id="loginBtn">ВОЙТИ</button>
         <p class="toggle-mode" id="toggleAuthBtn">Нет аккаунта? Зарегистрироваться</p>
@@ -36,7 +38,7 @@
                         <div class="user-id" id="userIdDisplay">ID: Loading...</div>
                         <div class="user-name" id="userNameDisplay">User</div>
                     </div>
-                    <input type="text" id="searchInput" placeholder="🔍 Поиск...">
+                    <input type="text" id="searchInput" placeholder="🔍 Поиск по ID...">
                 </div>
 
                 <div class="contacts-section">
@@ -104,6 +106,12 @@
             </div>
 
             <div class="settings-section">
+                <h3>Изменить ID</h3>
+                <input type="text" id="newIdInput" placeholder="Новый ID (например: NEW123)">
+                <button class="btn-primary" id="changeIdBtn">Изменить</button>
+            </div>
+
+            <div class="settings-section">
                 <h3>Добавить контакт</h3>
                 <input type="text" id="addContactId" placeholder="ID контакта (например: ARN923)">
                 <button class="btn-primary" id="addContactBtn">Добавить</button>
@@ -133,7 +141,7 @@
                 <button class="control-btn mic-btn" id="toggleMicBtn" title="Микрофон">🎤</button>
                 <button class="control-btn camera-btn" id="toggleCameraBtn" title="Камера">📹</button>
                 <button class="control-btn end-call-btn" id="endCallBtn">Завершить</button>
-                <button class="control-btn answer-btn" id="answerCallBtn">Ответить</button>
+                <button class="control-btn answer-btn" id="answerCallBtn" style="display: none;">Ответить</button>
             </div>
         </div>
     </div>

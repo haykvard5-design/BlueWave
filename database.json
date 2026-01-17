@@ -1,7 +1,7 @@
 {
   "users": {
     "hayko": {
-      "hash": "$2b$10$...", 
+      "hash": "$2b$10$...",
       "shortId": "HAY123",
       "createdAt": "2026-01-17"
     },
@@ -9,7 +9,20 @@
       "hash": "$2b$10$...",
       "shortId": "ARE456",
       "createdAt": "2026-01-17"
+    },
+    "hayko91234": {
+      "hash": "$2b$10$xKJjPrXnXfscqr30A7oem.89V5PVn04JgLkR7SBkOXJn0zvTe7dgi",
+      "shortId": "HAY163",
+      "createdAt": "2026-01-17T10:36:08.677Z"
     }
   },
-  "messages": []
+  "messages": [
+    {
+      "from": "c3iQDglejkAcvyRWAAAH",
+      "senderName": "hayko91234",
+      "text": "cxczxczxcxzccx",
+      "timestamp": "2026-01-17T10:36:48.346Z",
+      "type": "group"
+    }
+  ]
 }

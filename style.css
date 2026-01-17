@@ -1,33 +1,82 @@
-* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-body, html { width: 100%; height: 100%; background-color: #007bff; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background-color: #007bff; /* Тот самый синий фон */
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-/* КАРТОЧКА ВХОДА */
-.login-card { background: white; width: 320px; padding: 40px 30px; border-radius: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-.blue-icon-box { width: 80px; height: 80px; background: #007bff; border-radius: 20px; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; }
-.blue-icon-box img { width: 50px; filter: brightness(0) invert(1); }
-.brand-name { color: #0056b3; font-size: 28px; font-weight: bold; margin-bottom: 5px; }
-.welcome-text { color: #888; font-size: 13px; margin-bottom: 25px; }
-.auth-fields input { width: 100%; padding: 12px 15px; margin-bottom: 12px; border: 1px solid #eef0f2; border-radius: 12px; background: #f9fbff; outline: none; }
-.btn-primary { width: 100%; background: #007bff; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
-.toggle-mode { margin-top: 15px; font-size: 14px; color: #333; cursor: pointer; text-decoration: underline; }
+/* Карточка авторизации */
+.login-card {
+    background: white;
+    padding: 40px;
+    border-radius: 24px;
+    width: 350px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+}
 
-/* ИНТЕРФЕЙС ЧАТА */
-#chat { width: 100%; height: 100%; background: white; }
-.app-container { display: flex; height: 100%; }
-.sidebar { width: 280px; border-right: 1px solid #eee; display: flex; flex-direction: column; background: #fff; }
-.sidebar-header { padding: 20px; border-bottom: 1px solid #eee; }
-#search-input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #eee; outline: none; margin-top: 10px; }
-.section-title { padding: 15px 20px 5px; font-size: 11px; color: #aaa; text-transform: uppercase; font-weight: bold; }
-.user-item { display: flex; align-items: center; padding: 12px 20px; cursor: pointer; }
-.user-item.active { background: #eef6ff; }
-.mini-cube { width: 35px; height: 35px; border-radius: 8px; background: #007bff; margin-right: 12px; }
+.logo-box {
+    background: #0062cc;
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 20px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-.chat-main { flex: 1; display: flex; flex-direction: column; }
-.chat-header { padding: 20px; border-bottom: 1px solid #eee; font-weight: bold; }
-#messages { flex: 1; padding: 20px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; }
-.message-input-area { padding: 15px; border-top: 1px solid #eee; display: flex; gap: 10px; }
-.message-input-area input { flex: 1; padding: 12px; border-radius: 20px; border: 1px solid #eee; outline: none; }
+.logo-box img {
+    width: 70%;
+    height: 70%;
+}
 
-/* МОДАЛКА */
-.modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; }
-.modal-content { background: white; padding: 30px; border-radius: 25px; width: 300px; text-align: center; }
+h2 {
+    color: #007bff;
+    font-size: 32px;
+    margin: 0 0 10px;
+    font-weight: 700;
+}
+
+.welcome-text {
+    color: #888;
+    font-size: 15px;
+    margin-bottom: 30px;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    font-size: 16px;
+    outline: none;
+    background: #fdfdfd;
+}
+
+input:focus {
+    border-color: #007bff;
+    background: #fff;
+}
+
+.btn-primary {
+    width: 100%;
+    padding: 15px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background: #1976D2;
+}

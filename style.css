@@ -65,6 +65,11 @@ h2 {
     margin-bottom: 30px;
 }
 
+.auth-fields {
+    display: flex;
+    flex-direction: column;
+}
+
 input {
     width: 100%;
     padding: 15px;
@@ -103,6 +108,19 @@ input:focus {
 
 .btn-primary:active {
     transform: translateY(0);
+}
+
+.toggle-mode {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #007bff;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.toggle-mode:hover {
+    color: #0056b3;
 }
 
 /* ========== ОСНОВНОЙ ИНТЕРФЕЙС ========== */
@@ -186,6 +204,13 @@ input:focus {
     border-radius: 20px;
     font-size: 14px;
     background: #f0f0f0;
+    outline: none;
+    transition: all 0.2s;
+}
+
+#searchInput:focus {
+    background: white;
+    border-color: #007bff;
 }
 
 .contacts-section,
@@ -404,6 +429,13 @@ input:focus {
     border-bottom-left-radius: 4px;
 }
 
+.message-bubble img {
+    max-width: 100%;
+    border-radius: 10px;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
 .message-time {
     font-size: 11px;
     color: #999;
@@ -424,6 +456,30 @@ input:focus {
     display: flex;
     gap: 10px;
     align-items: center;
+}
+
+.btn-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-image:hover {
+    transform: scale(1.05);
+}
+
+.btn-image:active {
+    transform: scale(0.95);
 }
 
 #messageInput {
@@ -456,6 +512,7 @@ input:focus {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .btn-send:hover {
@@ -579,7 +636,8 @@ input:focus {
     color: #666;
 }
 
-#addContactBtn {
+#addContactBtn,
+#changeIdBtn {
     width: 100%;
 }
 
@@ -637,6 +695,7 @@ input:focus {
     display: flex;
     gap: 15px;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .control-btn {
@@ -653,18 +712,32 @@ input:focus {
 }
 
 .mic-btn,
-.camera-btn {
+.camera-btn,
+.screen-btn {
     background: #444;
     color: white;
 }
 
 .mic-btn:hover,
-.camera-btn:hover {
+.camera-btn:hover,
+.screen-btn:hover {
     background: #555;
 }
 
 .mic-btn.off,
 .camera-btn.off {
+    background: #d32f2f;
+}
+
+.screen-btn {
+    background: #ff9800;
+}
+
+.screen-btn:hover {
+    background: #f57c00;
+}
+
+.screen-btn.off {
     background: #d32f2f;
 }
 
@@ -788,6 +861,16 @@ input:focus {
         width: 100px;
         height: 100px;
     }
+
+    .call-controls {
+        gap: 10px;
+    }
+
+    .control-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 18px;
+    }
 }
 
 @media (max-width: 600px) {
@@ -806,5 +889,18 @@ input:focus {
 
     .modal-content {
         width: 95%;
+    }
+
+    .chat-wrapper {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: 30vh;
+    }
+
+    .chat-main {
+        height: 70vh;
     }
 }

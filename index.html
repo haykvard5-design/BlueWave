@@ -82,6 +82,8 @@
 
                 <!-- ВВОД СООБЩЕНИЯ -->
                 <div class="input-area">
+                    <button class="btn-image" id="imageBtn" title="Отправить картинку">🖼️</button>
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
                     <input type="text" id="messageInput" placeholder="Напишите сообщение...">
                     <button class="btn-send" id="sendBtn">➤</button>
                 </div>
@@ -120,7 +122,7 @@
             <div class="settings-section">
                 <h3>Информация</h3>
                 <p><strong>BlueWave v1.0</strong></p>
-                <p>Современный мессенджер с видеозвонками</p>
+                <p>Современный мессенджер с видеозвонками и отправкой картинок</p>
             </div>
         </div>
     </div>
@@ -140,6 +142,7 @@
             <div class="call-controls">
                 <button class="control-btn mic-btn" id="toggleMicBtn" title="Микрофон">🎤</button>
                 <button class="control-btn camera-btn" id="toggleCameraBtn" title="Камера">📹</button>
+                <button class="control-btn screen-btn" id="toggleScreenBtn" title="Показать экран">🖥️</button>
                 <button class="control-btn end-call-btn" id="endCallBtn">Завершить</button>
                 <button class="control-btn answer-btn" id="answerCallBtn" style="display: none;">Ответить</button>
             </div>

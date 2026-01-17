@@ -8,9 +8,11 @@ let isRegisterMode = false;
 let currentChat = null;
 let currentLanguage = 'ru';
 let localStream = null;
+let screenStream = null;
 let peerConnection = null;
 let incomingCall = null;
-let allUsers = []; // Все пользователи онлайн
+let allUsers = [];
+let isScreenSharing = false;
 
 // ПЕРЕВОДЫ
 const translations = {
@@ -249,10 +251,8 @@ function initializeChat() {
             const contactsList = document.getElementById('contactsList');
 
             if (searchTerm === '') {
-                // Показываем добавленные контакты
                 socket.emit('refresh-users');
             } else {
-                // Фильтруем все пользователей по ID
                 contactsList.innerHTML = '';
                 
                 allUsers.forEach(user => {
@@ -296,6 +296,37 @@ function initializeChat() {
         messageInput.onkeypress = (e) => {
             if (e.key === 'Enter') sendMessage();
         };
+    }
+
+    // ОТПРАВКА КАРТИНКИ
+    const imageBtn = document.getElementById('imageBtn');
+    const imageInput = document.getElementById('imageInput');
+    
+    if (imageBtn) {
+        imageBtn.onclick = () => {
+            imageInput.click();
+        };
+    }
+
+    if (imageInput) {
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && currentChat) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const imageData = event.target.result;
+                    const event_type = currentChat.type === 'group' ? 'group-image' : 'private-image';
+                    socket.emit(event_type, { 
+                        to: currentChat.id, 
+                        image: imageData,
+                        fileName: file.name 
+                    });
+                    renderImage(imageData, 'own');
+                };
+                reader.readAsDataURL(file);
+            }
+            imageInput.value = '';
+        });
     }
 
     // ГЛОБАЛЬНАЯ ГРУППА
@@ -348,6 +379,12 @@ function initializeChat() {
                 toggleCameraBtn.style.opacity = videoTracks[0].enabled ? '1' : '0.5';
             }
         };
+    }
+
+    // ПОКАЗ ЭКРАНА
+    const toggleScreenBtn = document.getElementById('toggleScreenBtn');
+    if (toggleScreenBtn) {
+        toggleScreenBtn.onclick = toggleScreenShare;
     }
 
     // ЗАВЕРШЕНИЕ ЗВОНКА
@@ -453,11 +490,10 @@ socket.on('auth-success-register', (msg) => {
 
 // ОБНОВЛЕНИЕ СПИСКА КОНТАКТОВ
 socket.on('update-users', (users) => {
-    allUsers = users; // Сохраняем всех пользователей для поиска
+    allUsers = users;
     const contactsList = document.getElementById('contactsList');
     const searchInput = document.getElementById('searchInput');
     
-    // Если поиск пустой, показываем добавленные контакты
     if (!searchInput || searchInput.value.trim() === '') {
         contactsList.innerHTML = '';
         
@@ -515,6 +551,13 @@ socket.on('receive-msg', (data) => {
     }
 });
 
+socket.on('receive-image', (data) => {
+    if (currentChat && ((currentChat.type === 'private' && currentChat.id === data.from) || 
+                       (currentChat.type === 'group' && data.type === 'group'))) {
+        renderImage(data.image, 'other', data.name);
+    }
+});
+
 function renderMessage(name, text, side) {
     const container = document.getElementById('messagesContainer');
     
@@ -539,6 +582,30 @@ function renderMessage(name, text, side) {
     container.scrollTop = container.scrollHeight;
 }
 
+function renderImage(imageData, side, name = 'User') {
+    const container = document.getElementById('messagesContainer');
+    
+    if (container.querySelector('.empty-state')) {
+        container.innerHTML = '';
+    }
+
+    const div = document.createElement('div');
+    div.className = `message ${side === 'own' ? 'own' : 'other'}`;
+    
+    const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+    
+    div.innerHTML = `
+        <div class="message-bubble">
+            ${side === 'other' ? `<strong>${name}</strong><br>` : ''}
+            <img src="${imageData}" style="max-width: 300px; border-radius: 10px; margin-top: 5px;">
+            <span class="message-time">${time}</span>
+        </div>
+    `;
+    
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
 // ========== ЗВОНКИ ==========
 const STUN_SERVERS = [
     { urls: 'stun:stun.l.google.com:19302' },
@@ -546,8 +613,8 @@ const STUN_SERVERS = [
 ];
 
 async function initiateCall(isVideo) {
-    if (!currentChat || currentChat.type === 'group') {
-        alert('Выберите контакт');
+    if (!currentChat) {
+        alert('Выберите контакт или группу');
         return;
     }
 
@@ -582,13 +649,14 @@ async function initiateCall(isVideo) {
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
 
-        socket.emit(isVideo ? 'video-call' : 'audio-call', {
+        const callType = currentChat.type === 'group' ? (isVideo ? 'group-video-call' : 'group-audio-call') : (isVideo ? 'video-call' : 'audio-call');
+        socket.emit(callType, {
             to: currentChat.id,
             offer: offer
         });
 
         document.getElementById('callModal').classList.add('active');
-        document.getElementById('callTitle').textContent = `Звонок ${currentChat.shortId}...`;
+        document.getElementById('callTitle').textContent = `Звонок ${currentChat.shortId || 'группе'}...`;
         document.getElementById('answerCallBtn').style.display = 'none';
 
     } catch (err) {
@@ -597,9 +665,64 @@ async function initiateCall(isVideo) {
     }
 }
 
+async function toggleScreenShare() {
+    if (!peerConnection) {
+        alert('Нет активного звонка');
+        return;
+    }
+
+    try {
+        if (isScreenSharing) {
+            // Выключаем показ экрана
+            screenStream.getTracks().forEach(track => track.stop());
+            
+            // Возвращаемся к камере
+            const videoTrack = localStream.getVideoTracks()[0];
+            const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+            if (sender) {
+                await sender.replaceTrack(videoTrack);
+            }
+            
+            isScreenSharing = false;
+            document.getElementById('toggleScreenBtn').style.opacity = '1';
+        } else {
+            // Включаем показ экрана
+            screenStream = await navigator.mediaDevices.getDisplayMedia({ 
+                video: { cursor: 'always' },
+                audio: false 
+            });
+            
+            const screenTrack = screenStream.getVideoTracks()[0];
+            const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+            if (sender) {
+                await sender.replaceTrack(screenTrack);
+            }
+            
+            isScreenSharing = true;
+            document.getElementById('toggleScreenBtn').style.opacity = '0.5';
+            
+            // Если пользователь остановил показ экрана в меню
+            screenTrack.onended = async () => {
+                const videoTrack = localStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    await sender.replaceTrack(videoTrack);
+                    isScreenSharing = false;
+                    document.getElementById('toggleScreenBtn').style.opacity = '1';
+                }
+            };
+        }
+    } catch (err) {
+        console.error('Ошибка показа экрана:', err);
+        alert('Ошибка при показе экрана: ' + err.message);
+    }
+}
+
 function endCall() {
     if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
+    }
+    if (screenStream) {
+        screenStream.getTracks().forEach(track => track.stop());
     }
     if (peerConnection) {
         peerConnection.close();
@@ -607,6 +730,8 @@ function endCall() {
     document.getElementById('callModal').classList.remove('active');
     document.getElementById('remoteVideo').srcObject = null;
     document.getElementById('localVideo').srcObject = null;
+    document.getElementById('toggleScreenBtn').style.opacity = '1';
+    isScreenSharing = false;
     if (currentChat) {
         socket.emit('end-call', { to: currentChat.id });
     }
@@ -633,6 +758,28 @@ socket.on('incoming-video-call', (data) => {
     document.getElementById('incomingCallModal').classList.add('active');
 });
 
+socket.on('incoming-group-audio-call', (data) => {
+    incomingCall = {
+        ...data,
+        from: data.from,
+        isVideo: false,
+        isGroup: true
+    };
+    document.getElementById('incomingCallName').textContent = `${data.from} (групповой звонок)`;
+    document.getElementById('incomingCallModal').classList.add('active');
+});
+
+socket.on('incoming-group-video-call', (data) => {
+    incomingCall = {
+        ...data,
+        from: data.from,
+        isVideo: true,
+        isGroup: true
+    };
+    document.getElementById('incomingCallName').textContent = `${data.from} (групповой видеозвонок)`;
+    document.getElementById('incomingCallModal').classList.add('active');
+});
+
 // ОБРАБОТКА ОТВЕТА
 socket.on('call-answered', async (data) => {
     try {
@@ -655,7 +802,7 @@ socket.on('ice-candidate', async (data) => {
     }
 });
 
-// ЗАВЕРШЕНИЕ ЗВОНКА ДРУГОЙ СТОРОНОЙ
+// ЗАВЕРШЕНИЕ ЗВОНКА
 socket.on('call-ended', () => {
     endCall();
     alert('Звонок завершен');

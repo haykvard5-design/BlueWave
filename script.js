@@ -1,1023 +1,975 @@
-const socket = io();
-
-// ПЕРЕМЕННЫЕ
-let myShortId = '';
-let myName = '';
-let addedContacts = [];
-let isRegisterMode = false;
-let currentChat = null;
-let currentLanguage = 'ru';
-let localStream = null;
-let screenStream = null;
-let peerConnection = null;
-let incomingCall = null;
-let allUsers = [];
-let isScreenSharing = false;
-let friendRequests = [];
-
-// ПЕРЕВОДЫ
+= Translation Object ==========
 const translations = {
-    ru: {
-        welcomeText: 'Добро пожаловать в будущее общения',
-        selectChat: 'Выберите чат',
-        selectChatHint: 'Выберите контакт для начала общения',
-        online: 'Online',
-        offline: 'Offline',
-        addContact: 'Отправить запрос в друзья',
-        addContactId: 'ID контакта (например: ARN923)',
-        addContactBtn: 'Отправить',
-        incoming: 'Входящий звонок от',
-        callEnded: 'Звонок завершен',
-        settings: 'Настройки',
-        language: 'Язык',
-        info: 'Информация',
-        changeId: 'Изменить ID',
-        newId: 'Новый ID',
-        confirmChangeId: 'Изменить',
-        idChanged: 'ID успешно изменен!',
-        login: 'ВОЙТИ',
-        register: 'ЗАРЕГИСТРИРОВАТЬСЯ',
-        haveAccount: 'Уже есть аккаунт? Войти',
-        noAccount: 'Нет аккаунта? Зарегистрироваться',
-        loginWelcome: 'Добро пожаловать в будущее общения',
-        registerWelcome: 'Создайте новый аккаунт',
-        aboutText: 'BlueWave v1.0 - Современный мессенджер с видеозвонками и отправкой картинок',
-        messageInputPlaceholder: 'Напишите сообщение...',
-        searchPlaceholder: '🔍 Поиск по ID...',
-        contacts: 'Контакты',
-        groups: 'Группы',
-        friendRequests: 'Запросы в друзья',
-        blueWaveGroup: 'BlueWave Group',
-        selectChatMessage: 'Выберите контакт для начала общения',
-        noNewIdProvided: 'Введите новый ID',
-        sameIdAsCurrently: 'Это ваш текущий ID',
-        contactAdded: 'Контакт добавлен!',
-        enterContactId: 'Введите ID',
-        alreadyAdded: 'Контакт уже добавлен',
-        thisIsYourId: 'Это ваш ID',
-        selectContactForCall: 'Выберите контакт',
-        callError: 'Ошибка при инициировании звонка: ',
-        fillAllFields: 'Заполните все поля',
-        callEnded: 'Звонок завершен',
-        callDeclined: 'Звонок отклонен',
-        friendRequestSent: 'Запрос в друзья отправлен!',
-        friendRequestReceived: 'Новый запрос в друзья!',
-        friendAdded: 'Контакт добавлен!'
-    },
     en: {
-        welcomeText: 'Welcome to the future of communication',
-        selectChat: 'Select chat',
-        selectChatHint: 'Select a contact to start chatting',
-        online: 'Online',
-        offline: 'Offline',
-        addContact: 'Send friend request',
-        addContactId: 'Contact ID (e.g., ARN923)',
-        addContactBtn: 'Send',
-        incoming: 'Incoming call from',
-        callEnded: 'Call ended',
-        settings: 'Settings',
-        language: 'Language',
-        info: 'Information',
-        changeId: 'Change ID',
-        newId: 'New ID',
-        confirmChangeId: 'Change',
-        idChanged: 'ID successfully changed!',
-        login: 'LOGIN',
-        register: 'REGISTER',
-        haveAccount: 'Have account? Login',
-        noAccount: 'No account? Register',
-        loginWelcome: 'Welcome to the future of communication',
-        registerWelcome: 'Create a new account',
-        aboutText: 'BlueWave v1.0 - Modern messenger with video calls and photo sharing',
-        messageInputPlaceholder: 'Write a message...',
-        searchPlaceholder: '🔍 Search by ID...',
-        contacts: 'Contacts',
-        groups: 'Groups',
-        friendRequests: 'Friend Requests',
-        blueWaveGroup: 'BlueWave Group',
-        selectChatMessage: 'Select a contact to start chatting',
-        noNewIdProvided: 'Enter a new ID',
-        sameIdAsCurrently: 'This is your current ID',
-        contactAdded: 'Contact added!',
-        enterContactId: 'Enter ID',
-        alreadyAdded: 'Contact already added',
-        thisIsYourId: 'This is your ID',
-        selectContactForCall: 'Select a contact',
-        callError: 'Error initiating call: ',
-        fillAllFields: 'Fill in all fields',
-        callEnded: 'Call ended',
-        callDeclined: 'Call declined',
-        friendRequestSent: 'Friend request sent!',
-        friendRequestReceived: 'New friend request!',
-        friendAdded: 'Contact added!'
+        loginSubtitle: "Connect instantly, message securely",
+        login: "Login",
+        register: "Register",
+        username: "Username (3-20 characters)",
+        password: "Password (4-50 characters)",
+        loginBtn: "Login",
+        registerBtn: "Register",
+        welcome: "Welcome",
+        selectContact: "Select a contact to start chatting",
+        typeMessage: "Type a message...",
+        settings: "Settings",
+        language: "Language",
+        languageDesc: "English",
+        profile: "Profile",
+        profileDesc: "Manage your ID",
+        about: "About",
+        aboutDesc: "Version 1.0.0",
+        selectLanguage: "Select Language",
+        changeId: "Change ID",
+        addContact: "Add Contact",
+        change: "Change",
+        add: "Add",
+        invalidId: "ID must be 3-6 characters (letters and numbers)",
+        idChanged: "ID updated successfully",
+        contactAdded: "Contact added",
+        contactNotFound: "Contact not found",
+        incomingCall: "Incoming Call",
+        audioCall: "Audio Call",
+        videoCall: "Video Call",
+        accept: "Accept",
+        decline: "Decline",
+        endCall: "End Call",
+        noContacts: "No contacts yet",
+        errorLogin: "Login failed. Check credentials.",
+        errorRegister: "Registration failed. Username may be taken.",
+        microphone: "Mute Microphone",
+        camera: "Turn Off Camera",
+        screenShare: "Share Screen",
+        friendRequest: "Friend Request",
+        from: "from",
+        send: "Send",
+        search: "Search ID or name..."
+    },
+    ru: {
+        loginSubtitle: "Общайтесь мгновенно, безопасно",
+        login: "Вход",
+        register: "Регистрация",
+        username: "Имя пользователя (3-20 символов)",
+        password: "Пароль (4-50 символов)",
+        loginBtn: "Вход",
+        registerBtn: "Регистрация",
+        welcome: "Добро пожаловать",
+        selectContact: "Выберите контакт для начала общения",
+        typeMessage: "Введите сообщение...",
+        settings: "Настройки",
+        language: "Язык",
+        languageDesc: "Русский",
+        profile: "Профиль",
+        profileDesc: "Управляйте вашим ID",
+        about: "О приложении",
+        aboutDesc: "Версия 1.0.0",
+        selectLanguage: "Выберите язык",
+        changeId: "Изменить ID",
+        addContact: "Добавить контакт",
+        change: "Изменить",
+        add: "Добавить",
+        invalidId: "ID должен быть 3-6 символов (буквы и цифры)",
+        idChanged: "ID успешно обновлён",
+        contactAdded: "Контакт добавлен",
+        contactNotFound: "Контакт не найден",
+        incomingCall: "Входящий звонок",
+        audioCall: "Аудиозвонок",
+        videoCall: "Видеозвонок",
+        accept: "Принять",
+        decline: "Отклонить",
+        endCall: "Завершить",
+        noContacts: "Контактов еще нет",
+        errorLogin: "Ошибка входа. Проверьте учетные данные.",
+        errorRegister: "Ошибка регистрации. Имя пользователя может быть занято.",
+        microphone: "Отключить микрофон",
+        camera: "Отключить камеру",
+        screenShare: "Общий доступ к экрану",
+        friendRequest: "Запрос дружбы",
+        from: "от",
+        send: "Отправить",
+        search: "Поиск ID или имени..."
     }
 };
 
-function t(key) {
-    return translations[currentLanguage][key] || key;
-}
+// ========== Global Variables ==========
+let socket;
+let currentUser = null;
+let currentLanguage = 'en';
+let selectedContactId = null;
+let peerConnection = null;
+let localStream = null;
+let isCallActive = false;
+let isMicMuted = false;
+let isCameraOff = false;
+let isScreenSharing = false;
+let screenTrack = null;
 
-// ========== ИНИЦИАЛИЗАЦИЯ ==========
-window.addEventListener('DOMContentLoaded', () => {
-    initializeAuth();
-    initializeLanguage();
+const STUN_SERVERS = [
+    { urls: ['stun:stun.l.google.com:19302'] },
+    { urls: ['stun:stun1.l.google.com:19302'] }
+];
+
+// ========== DOM Elements ==========
+const loginScreen = document.getElementById('loginScreen');
+const chatScreen = document.getElementById('chatScreen');
+const authForm = document.getElementById('authForm');
+const username = document.getElementById('username');
+const password = document.getElementById('password');
+const authError = document.getElementById('authError');
+const loginTab = document.getElementById('loginTab');
+const registerTab = document.getElementById('registerTab');
+const authButton = document.getElementById('authButton');
+const contactsList = document.getElementById('contactsList');
+const messagesContainer = document.getElementById('messagesContainer');
+const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+const imageBtn = document.getElementById('imageBtn');
+const imageInput = document.getElementById('imageInput');
+const callBtn = document.getElementById('callBtn');
+const videoBtn = document.getElementById('videoBtn');
+const settingsBtn = document.getElementById('settingsBtn');
+const searchInput = document.getElementById('searchInput');
+
+// Modal Elements
+const settingsModal = document.getElementById('settingsModal');
+const languagesModal = document.getElementById('languagesModal');
+const profileModal = document.getElementById('profileModal');
+const callModal = document.getElementById('callModal');
+const incomingCallModal = document.getElementById('incomingCallModal');
+
+// ========== Initialization ==========
+document.addEventListener('DOMContentLoaded', () => {
     initializeChat();
+    setupEventListeners();
 });
 
-function initializeAuth() {
-    const loginBtn = document.getElementById('loginBtn');
-    const toggleBtn = document.getElementById('toggleAuthBtn');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
+function initializeChat() {
+    socket = io();
 
-    if (loginBtn) {
-        loginBtn.onclick = handleAuthSubmit;
-    }
+    // Socket Events
+    socket.on('connect', () => {
+        console.log('Connected to server');
+    });
 
-    if (toggleBtn) {
-        toggleBtn.onclick = toggleAuthMode;
-    }
+    socket.on('login-success', (data) => {
+        currentUser = data;
+        console.log('User logged in:', currentUser);
+        loginScreen.classList.remove('active');
+        chatScreen.classList.add('active');
+        updateProfileDisplay();
+        loadContacts();
+    });
 
-    if (usernameInput) {
-        usernameInput.onkeypress = (e) => {
-            if (e.key === 'Enter') handleAuthSubmit();
-        };
-    }
+    socket.on('register-success', (data) => {
+        currentUser = data;
+        console.log('User registered:', currentUser);
+        loginScreen.classList.remove('active');
+        chatScreen.classList.add('active');
+        updateProfileDisplay();
+    });
 
-    if (passwordInput) {
-        passwordInput.onkeypress = (e) => {
-            if (e.key === 'Enter') handleAuthSubmit();
-        };
-    }
+    socket.on('auth-error', (message) => {
+        authError.textContent = message;
+    });
 
-    updateAuthScreen();
-}
+    socket.on('user-list', (users) => {
+        updateContactsList(users);
+    });
 
-function toggleAuthMode() {
-    isRegisterMode = !isRegisterMode;
-    updateAuthScreen();
-}
+    socket.on('refresh-users', (users) => {
+        updateContactsList(users);
+    });
 
-function updateAuthScreen() {
-    const loginBtn = document.getElementById('loginBtn');
-    const toggleBtn = document.getElementById('toggleAuthBtn');
-    const welcomeText = document.getElementById('welcomeText');
+    socket.on('private-message', (data) => {
+        if (data.from === selectedContactId || selectedContactId === null) {
+            renderMessage(data.fromName, data.text, 'other');
+        }
+    });
 
-    if (isRegisterMode) {
-        loginBtn.textContent = t('register');
-        toggleBtn.textContent = t('haveAccount');
-        welcomeText.textContent = t('registerWelcome');
-    } else {
-        loginBtn.textContent = t('login');
-        toggleBtn.textContent = t('noAccount');
-        welcomeText.textContent = t('loginWelcome');
-    }
-}
+    socket.on('image-message', (data) => {
+        renderImage(data.imageData, 'other', data.fromName);
+    });
 
-function handleAuthSubmit() {
-    const user = document.getElementById('username').value.trim();
-    const pass = document.getElementById('password').value.trim();
-    
-    if (!user || !pass) {
-        alert(t('fillAllFields'));
-        return;
-    }
+    socket.on('friend-request', (data) => {
+        showFriendRequestNotification(data);
+    });
 
-    const action = isRegisterMode ? 'register' : 'login';
-    console.log(`Отправка ${action}:`, { user });
-    socket.emit(action, { user, pass });
-}
+    socket.on('friend-request-accepted', (data) => {
+        console.log('Friend request accepted by', data.fromName);
+    });
 
-function initializeLanguage() {
-    const langBtns = document.querySelectorAll('.lang-btn');
-    langBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            langBtns.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            currentLanguage = this.dataset.lang;
+    socket.on('incoming-audio-call', (data) => {
+        handleIncomingCall(data, 'audio');
+    });
+
+    socket.on('incoming-video-call', (data) => {
+        handleIncomingCall(data, 'video');
+    });
+
+    socket.on('call-offer', async (data) => {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socket.emit('call-answer', { to: data.from, answer: answer });
+    });
+
+    socket.on('call-answer', async (data) => {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+    });
+
+    socket.on('ice-candidate', async (data) => {
+        try {
+            if (data.candidate) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+            }
+        } catch (err) {
+            console.error('Error adding ICE candidate:', err);
+        }
+    });
+
+    socket.on('end-call', () => {
+        endCall();
+    });
+
+    // Modal Navigation
+    const settingsItems = document.querySelectorAll('.settings-item');
+    settingsItems[0].onclick = () => {
+        settingsModal.classList.remove('active');
+        languagesModal.classList.add('active');
+    };
+    settingsItems[1].onclick = () => {
+        settingsModal.classList.remove('active');
+        profileModal.classList.add('active');
+    };
+
+    // Language Selection
+    const languageOptions = document.querySelectorAll('.language-option');
+    languageOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            const lang = this.dataset.lang;
+            currentLanguage = lang;
+            
+            // Update checkmarks
+            document.querySelectorAll('.language-check').forEach(check => {
+                check.textContent = '';
+            });
+            document.getElementById(`check-${lang}`).textContent = '✓';
+            
             updateAllLanguageText();
         });
     });
-}
 
-// ОБНОВЛЕНИЕ ВСЕГО ТЕКСТА ИНТЕРФЕЙСА ПРИ СМЕНЕ ЯЗЫКА
-function updateAllLanguageText() {
-    const welcomeText = document.getElementById('welcomeText');
-    if (welcomeText) {
-        if (isRegisterMode) {
-            welcomeText.textContent = t('registerWelcome');
-        } else {
-            welcomeText.textContent = t('loginWelcome');
-        }
-    }
-
-    const loginBtn = document.getElementById('loginBtn');
-    if (loginBtn) {
-        loginBtn.textContent = isRegisterMode ? t('register') : t('login');
-    }
-
-    const toggleBtn = document.getElementById('toggleAuthBtn');
-    if (toggleBtn) {
-        toggleBtn.textContent = isRegisterMode ? t('haveAccount') : t('noAccount');
-    }
-
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.placeholder = t('searchPlaceholder');
-    }
-
-    const messageInput = document.getElementById('messageInput');
-    if (messageInput) {
-        messageInput.placeholder = t('messageInputPlaceholder');
-    }
-
-    const contactsTitle = document.querySelector('.contacts-section .section-title');
-    if (contactsTitle) {
-        contactsTitle.textContent = t('contacts');
-    }
-
-    const groupsTitle = document.querySelector('.groups-section .section-title');
-    if (groupsTitle) {
-        groupsTitle.textContent = t('groups');
-    }
-
-    const friendRequestsTitle = document.querySelector('.friend-requests-section .section-title');
-    if (friendRequestsTitle) {
-        friendRequestsTitle.textContent = t('friendRequests');
-    }
-
-    const globalGroupBtn = document.getElementById('globalGroupBtn');
-    if (globalGroupBtn) {
-        const span = globalGroupBtn.querySelector('span');
-        if (span) {
-            span.textContent = t('blueWaveGroup');
-        }
-    }
-
-    const chatTitle = document.getElementById('chatTitle');
-    if (chatTitle && chatTitle.textContent === 'Выберите чат') {
-        chatTitle.textContent = t('selectChat');
-    }
-
-    const emptyState = document.querySelector('.empty-state p');
-    if (emptyState) {
-        emptyState.textContent = t('selectChatMessage');
-    }
+    // Profile Actions
+    const changeIdBtn = document.getElementById('changeIdBtn');
+    changeIdBtn.addEventListener('click', changeUserID);
 
     const addContactBtn = document.getElementById('addContactBtn');
-    if (addContactBtn) {
-        addContactBtn.textContent = t('addContactBtn');
-    }
+    addContactBtn.addEventListener('click', addContact);
 
-    const changeIdBtn = document.getElementById('changeIdBtn');
-    if (changeIdBtn) {
-        changeIdBtn.textContent = t('confirmChangeId');
-    }
-
-    const addContactId = document.getElementById('addContactId');
-    if (addContactId) {
-        addContactId.placeholder = t('addContactId');
-    }
-
-    const newIdInput = document.getElementById('newIdInput');
-    if (newIdInput) {
-        newIdInput.placeholder = t('newId');
-    }
-
-    const settingsModalHeader = document.querySelector('#settingsModal .modal-header h2');
-    if (settingsModalHeader) {
-        settingsModalHeader.textContent = t('settings');
-    }
-
-    const infoSection = document.querySelector('.settings-section:last-child');
-    if (infoSection) {
-        const paragraphs = infoSection.querySelectorAll('p');
-        if (paragraphs.length > 0) {
-            paragraphs[1].textContent = t('aboutText');
-        }
-    }
-}
-
-function initializeChat() {
-    // НАСТРОЙКИ
-    const settingsBtn = document.getElementById('settingsBtn');
-    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
-
-    if (settingsBtn) {
-        settingsBtn.onclick = () => {
-            document.getElementById('settingsModal').classList.add('active');
-        };
-    }
-
-    if (closeSettingsBtn) {
-        closeSettingsBtn.onclick = () => {
-            document.getElementById('settingsModal').classList.remove('active');
-        };
-    }
-
-    // Закрытие модалки при клике на фон
-    window.onclick = (e) => {
-        const settingsModal = document.getElementById('settingsModal');
-        const incomingCallModal = document.getElementById('incomingCallModal');
-        
-        if (e.target === settingsModal) {
-            settingsModal.classList.remove('active');
-        }
-        if (e.target === incomingCallModal) {
-            incomingCallModal.classList.remove('active');
-        }
-    };
-
-    // ИЗМЕНЕНИЕ ID
-    const changeIdBtn = document.getElementById('changeIdBtn');
-    if (changeIdBtn) {
-        changeIdBtn.onclick = () => {
-            const newId = document.getElementById('newIdInput').value.trim().toUpperCase();
-            
-            if (!newId) {
-                alert(t('noNewIdProvided'));
-                return;
-            }
-            
-            if (newId === myShortId) {
-                alert(t('sameIdAsCurrently'));
-                return;
-            }
-            
-            myShortId = newId;
-            document.getElementById('userIdDisplay').textContent = `ID: ${myShortId}`;
-            document.getElementById('newIdInput').value = '';
-            alert(t('idChanged'));
-            socket.emit('refresh-users');
-        };
-    }
-
-    // ДОБАВЛЕНИЕ КОНТАКТА (Отправить запрос в друзья)
-    const addContactBtn = document.getElementById('addContactBtn');
-    if (addContactBtn) {
-        addContactBtn.onclick = () => {
-            const id = document.getElementById('addContactId').value.trim().toUpperCase();
-            
-            if (!id) {
-                alert(t('enterContactId'));
-                return;
-            }
-            
-            if (id === myShortId) {
-                alert(t('thisIsYourId'));
-                return;
-            }
-            
-            if (addedContacts.includes(id)) {
-                alert(t('alreadyAdded'));
-                return;
-            }
-            
-            // Отправляем запрос в друзья
-            socket.emit('send-friend-request', { 
-                toId: id, 
-                fromId: myShortId,
-                fromName: myName 
-            });
-            
-            document.getElementById('addContactId').value = '';
-            alert(t('friendRequestSent'));
-        };
-    }
-
-    // ПОИСК ПО ID
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            const searchTerm = e.target.value.trim().toUpperCase();
-            const contactsList = document.getElementById('contactsList');
-
-            if (searchTerm === '') {
-                socket.emit('refresh-users');
-            } else {
-                contactsList.innerHTML = '';
-                
-                allUsers.forEach(user => {
-                    if (user.shortId.includes(searchTerm) && user.shortId !== myShortId) {
-                        const div = document.createElement('div');
-                        div.className = 'contact-item';
-                        div.innerHTML = `
-                            <div class="contact-avatar">👤</div>
-                            <div class="contact-info">
-                                <div class="contact-name">${user.name}</div>
-                                <div class="contact-status">${user.shortId}</div>
-                            </div>
-                        `;
-                        div.onclick = () => {
-                            if (!addedContacts.includes(user.shortId)) {
-                                socket.emit('send-friend-request', { 
-                                    toId: user.shortId, 
-                                    fromId: myShortId,
-                                    fromName: myName 
-                                });
-                                alert(t('friendRequestSent'));
-                            }
-                            searchInput.value = '';
-                            socket.emit('refresh-users');
-                            document.querySelectorAll('.contact-item, .group-item').forEach(el => {
-                                el.classList.remove('active');
-                            });
-                            openChat(user.socketId, user.name, 'private', user.shortId);
-                        };
-                        contactsList.appendChild(div);
-                    }
-                });
+    // Modal Close Buttons
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modalId = this.getAttribute('data-modal');
+            if (modalId) {
+                document.getElementById(modalId).classList.remove('active');
             }
         });
-    }
-
-    // ОТПРАВКА СООБЩЕНИЯ
-    const sendBtn = document.getElementById('sendBtn');
-    const messageInput = document.getElementById('messageInput');
-
-    if (sendBtn) {
-        sendBtn.onclick = sendMessage;
-    }
-
-    if (messageInput) {
-        messageInput.onkeypress = (e) => {
-            if (e.key === 'Enter') sendMessage();
-        };
-    }
-
-    // ОТПРАВКА КАРТИНКИ
-    const imageBtn = document.getElementById('imageBtn');
-    const imageInput = document.getElementById('imageInput');
-    
-    if (imageBtn) {
-        imageBtn.onclick = () => {
-            imageInput.click();
-        };
-    }
-
-    if (imageInput) {
-        imageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file && currentChat) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    const imageData = event.target.result;
-                    const event_type = currentChat.type === 'group' ? 'group-image' : 'private-image';
-                    socket.emit(event_type, { 
-                        to: currentChat.id, 
-                        image: imageData,
-                        fileName: file.name 
-                    });
-                    renderImage(imageData, 'own');
-                };
-                reader.readAsDataURL(file);
-            }
-            imageInput.value = '';
-        });
-    }
-
-    // ГЛОБАЛЬНАЯ ГРУППА
-    const globalGroupBtn = document.getElementById('globalGroupBtn');
-    if (globalGroupBtn) {
-        globalGroupBtn.onclick = () => {
-            document.querySelectorAll('.group-item, .contact-item').forEach(el => {
-                el.classList.remove('active');
-            });
-            globalGroupBtn.classList.add('active');
-            openChat('global', t('blueWaveGroup'), 'group');
-        };
-    }
-
-    // ЗВОНКИ
-    const callBtn = document.getElementById('callBtn');
-    const videoCallBtn = document.getElementById('videoCallBtn');
-
-    if (callBtn) {
-        callBtn.onclick = () => initiateCall(false);
-    }
-
-    if (videoCallBtn) {
-        videoCallBtn.onclick = () => initiateCall(true);
-    }
-
-    // УПРАВЛЕНИЕ МИКРОФОНОМ
-    const toggleMicBtn = document.getElementById('toggleMicBtn');
-    if (toggleMicBtn) {
-        toggleMicBtn.onclick = () => {
-            const audioTracks = localStream?.getAudioTracks() || [];
-            
-            if (audioTracks.length > 0) {
-                audioTracks[0].enabled = !audioTracks[0].enabled;
-                toggleMicBtn.classList.toggle('off');
-                toggleMicBtn.style.opacity = audioTracks[0].enabled ? '1' : '0.5';
-            }
-        };
-    }
-
-    // УПРАВЛЕНИЕ КАМЕРОЙ
-    const toggleCameraBtn = document.getElementById('toggleCameraBtn');
-    if (toggleCameraBtn) {
-        toggleCameraBtn.onclick = () => {
-            const videoTracks = localStream?.getVideoTracks() || [];
-            
-            if (videoTracks.length > 0) {
-                videoTracks[0].enabled = !videoTracks[0].enabled;
-                toggleCameraBtn.classList.toggle('off');
-                toggleCameraBtn.style.opacity = videoTracks[0].enabled ? '1' : '0.5';
-            }
-        };
-    }
-
-    // ПОКАЗ ЭКРАНА
-    const toggleScreenBtn = document.getElementById('toggleScreenBtn');
-    if (toggleScreenBtn) {
-        toggleScreenBtn.onclick = toggleScreenShare;
-    }
-
-    // ЗАВЕРШЕНИЕ ЗВОНКА
-    const endCallBtn = document.getElementById('endCallBtn');
-    if (endCallBtn) {
-        endCallBtn.onclick = () => {
-            endCall();
-        };
-    }
-
-    // ОТВЕТИТЬ НА ЗВОНОК
-    const acceptBtn = document.getElementById('acceptBtn');
-    if (acceptBtn) {
-        acceptBtn.onclick = async () => {
-            document.getElementById('incomingCallModal').classList.remove('active');
-            document.getElementById('callModal').classList.add('active');
-            
-            try {
-                const constraints = { audio: true, video: incomingCall.isVideo };
-                localStream = await navigator.mediaDevices.getUserMedia(constraints);
-                document.getElementById('localVideo').srcObject = localStream;
-                
-                peerConnection = new RTCPeerConnection({ iceServers: STUN_SERVERS });
-                
-                localStream.getTracks().forEach(track => {
-                    peerConnection.addTrack(track, localStream);
-                });
-
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        socket.emit('ice-candidate', {
-                            to: incomingCall.from,
-                            candidate: event.candidate
-                        });
-                    }
-                };
-
-                peerConnection.ontrack = (event) => {
-                    document.getElementById('remoteVideo').srcObject = event.streams[0];
-                };
-
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-
-                socket.emit('answer-call', {
-                    to: incomingCall.from,
-                    answer: answer
-                });
-
-            } catch (err) {
-                console.error('Ошибка при ответе:', err);
-                endCall();
-            }
-        };
-    }
-
-    // ОТКЛОНИТЬ ЗВОНОК
-    const declineBtn = document.getElementById('declineBtn');
-    if (declineBtn) {
-        declineBtn.onclick = () => {
-            document.getElementById('incomingCallModal').classList.remove('active');
-            socket.emit('decline-call', { to: incomingCall.from });
-        };
-    }
-}
-
-// ========== ОБРАБОТКА SOCKET СОБЫТИЙ ==========
-
-socket.on('connect', () => {
-    console.log('Подключено к серверу');
-});
-
-socket.on('disconnect', () => {
-    console.log('Отключено от сервера');
-});
-
-socket.on('auth-success', (data) => {
-    console.log('Вход успешен:', data);
-    myShortId = data.shortId;
-    myName = data.userName || 'User';
-    document.getElementById('auth-screen').style.display = 'none';
-    document.getElementById('chat-container').style.display = 'flex';
-    document.getElementById('userIdDisplay').textContent = `ID: ${myShortId}`;
-    document.getElementById('userNameDisplay').textContent = myName;
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
-});
-
-socket.on('auth-error', (msg) => {
-    console.log('Ошибка входа:', msg);
-    alert('Ошибка: ' + msg);
-});
-
-socket.on('auth-success-register', (msg) => {
-    console.log('Регистрация успешна');
-    alert(msg);
-    isRegisterMode = false;
-    updateAuthScreen();
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
-});
-
-// ОБНОВЛЕНИЕ СПИСКА КОНТАКТОВ
-socket.on('update-users', (users) => {
-    allUsers = users;
-    const contactsList = document.getElementById('contactsList');
-    const searchInput = document.getElementById('searchInput');
-    
-    if (!searchInput || searchInput.value.trim() === '') {
-        // Удаляем старые контакты, но сохраняем запросы
-        const friendRequestsSection = contactsList.querySelector('.friend-requests-section');
-        contactsList.innerHTML = '';
-        
-        if (friendRequestsSection) {
-            contactsList.appendChild(friendRequestsSection);
-        }
-        
-        users.forEach(user => {
-            if (addedContacts.includes(user.shortId) && user.shortId !== myShortId) {
-                const div = document.createElement('div');
-                div.className = 'contact-item';
-                div.innerHTML = `
-                    <div class="contact-avatar">👤</div>
-                    <div class="contact-info">
-                        <div class="contact-name">${user.name}</div>
-                        <div class="contact-status">${user.shortId}</div>
-                    </div>
-                `;
-                div.onclick = () => {
-                    document.querySelectorAll('.contact-item, .group-item').forEach(el => {
-                        el.classList.remove('active');
-                    });
-                    div.classList.add('active');
-                    openChat(user.socketId, user.name, 'private', user.shortId);
-                };
-                contactsList.appendChild(div);
-            }
-        });
-    }
-});
-
-// ОТКРЫТИЕ ЧАТА
-function openChat(id, name, type, shortId) {
-    currentChat = { id, type, shortId };
-    
-    document.getElementById('chatTitle').textContent = name;
-    document.getElementById('chatStatus').textContent = t('online');
-    document.getElementById('messagesContainer').innerHTML = '';
-    document.getElementById('messageInput').focus();
-}
-
-// ОТПРАВКА СООБЩЕНИЯ
-function sendMessage() {
-    const text = document.getElementById('messageInput').value.trim();
-    if (!text || !currentChat) return;
-
-    const event = currentChat.type === 'group' ? 'group-msg' : 'private-msg';
-    socket.emit(event, { to: currentChat.id, text });
-    
-    renderMessage('Вы', text, 'own');
-    document.getElementById('messageInput').value = '';
-}
-
-// ПОЛУЧЕНИЕ СООБЩЕНИЯ
-socket.on('receive-msg', (data) => {
-    if (currentChat && ((currentChat.type === 'private' && currentChat.id === data.from) || 
-                       (currentChat.type === 'group' && data.type === 'group'))) {
-        renderMessage(data.name, data.text, 'other');
-    }
-});
-
-socket.on('receive-image', (data) => {
-    if (currentChat && ((currentChat.type === 'private' && currentChat.id === data.from) || 
-                       (currentChat.type === 'group' && data.type === 'group'))) {
-        renderImage(data.image, 'other', data.name);
-    }
-});
-
-function renderMessage(name, text, side) {
-    const container = document.getElementById('messagesContainer');
-    
-    if (container.querySelector('.empty-state')) {
-        container.innerHTML = '';
-    }
-
-    const div = document.createElement('div');
-    div.className = `message ${side === 'own' ? 'own' : 'other'}`;
-    
-    const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-    
-    div.innerHTML = `
-        <div class="message-bubble">
-            ${side === 'other' ? `<strong>${name}</strong><br>` : ''}
-            ${text}
-            <span class="message-time">${time}</span>
-        </div>
-    `;
-    
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-}
-
-function renderImage(imageData, side, name = 'User') {
-    const container = document.getElementById('messagesContainer');
-    
-    if (container.querySelector('.empty-state')) {
-        container.innerHTML = '';
-    }
-
-    const div = document.createElement('div');
-    div.className = `message ${side === 'own' ? 'own' : 'other'}`;
-    
-    const time = new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-    
-    div.innerHTML = `
-        <div class="message-bubble">
-            ${side === 'other' ? `<strong>${name}</strong><br>` : ''}
-            <img src="${imageData}" style="max-width: 100%; border-radius: 8px; margin-top: 4px;">
-            <span class="message-time">${time}</span>
-        </div>
-    `;
-    
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-}
-
-// ========== ЗАПРОСЫ В ДРУЗЬЯ ==========
-socket.on('receive-friend-request', (data) => {
-    friendRequests.push({
-        fromId: data.fromId,
-        fromName: data.fromName
     });
 
-    const contactsList = document.getElementById('contactsList');
+    // Modal Back Buttons
+    document.querySelectorAll('.modal-back').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const backTo = this.getAttribute('data-back-to');
+            if (backTo) {
+                document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+                document.getElementById(backTo).classList.add('active');
+            }
+        });
+    });
+
+    updateAllLanguageText();
+}
+
+function setupEventListeners() {
+    // Auth Form
+    loginTab.addEventListener('click', () => {
+        switchAuthMode('login');
+    });
+
+    registerTab.addEventListener('click', () => {
+        switchAuthMode('register');
+    });
+
+    authForm.addEventListener('submit', handleAuthSubmit);
+
+    // Chat Events
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    imageBtn.addEventListener('click', () => {
+        imageInput.click();
+    });
+
+    imageInput.addEventListener('change', sendImage);
+
+    // Call Buttons
+    callBtn.addEventListener('click', () => initiateCall(false));
+    videoBtn.addEventListener('click', () => initiateCall(true));
+
+    // Settings
+    settingsBtn.addEventListener('click', () => {
+        settingsModal.classList.add('active');
+    });
+
+    // Search
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const contactItems = document.querySelectorAll('.contact-item');
+        
+        contactItems.forEach(item => {
+            const name = item.dataset.name.toLowerCase();
+            const id = item.dataset.id.toLowerCase();
+            
+            if (name.includes(query) || id.includes(query)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    // Incoming Call Buttons
+    document.getElementById('acceptCallBtn').addEventListener('click', acceptCall);
+    document.getElementById('declineCallBtn').addEventListener('click', declineCall);
+
+    // Call Controls
+    document.getElementById('toggleMicBtn').addEventListener('click', toggleMicrophone);
+    document.getElementById('toggleCameraBtn').addEventListener('click', toggleCamera);
+    document.getElementById('toggleScreenBtn').addEventListener('click', toggleScreenShare);
+    document.getElementById('endCallBtn').addEventListener('click', endCall);
+}
+
+// ========== Authentication ==========
+function switchAuthMode(mode) {
+    const isLogin = mode === 'login';
     
-    let friendRequestsSection = contactsList.querySelector('.friend-requests-section');
-    if (!friendRequestsSection) {
-        friendRequestsSection = document.createElement('div');
-        friendRequestsSection.className = 'friend-requests-section';
-        friendRequestsSection.innerHTML = `<div class="section-title">${t('friendRequests')}</div>`;
-        contactsList.insertBefore(friendRequestsSection, contactsList.firstChild);
+    loginTab.classList.toggle('active', isLogin);
+    registerTab.classList.toggle('active', !isLogin);
+    
+    authButton.textContent = isLogin ? 
+        translations[currentLanguage].loginBtn : 
+        translations[currentLanguage].registerBtn;
+    
+    authForm.dataset.mode = mode;
+    authError.textContent = '';
+}
+
+function handleAuthSubmit(e) {
+    e.preventDefault();
+    
+    const user = username.value.trim();
+    const pass = password.value.trim();
+    const mode = authForm.dataset.mode || 'login';
+
+    if (!user || !pass) {
+        authError.textContent = 'Please fill in all fields';
+        return;
     }
 
-    const div = document.createElement('div');
-    div.className = 'friend-request-item';
-    div.innerHTML = `
-        <div class="contact-avatar">👤</div>
-        <div class="contact-info">
-            <div class="contact-name">${data.fromName}</div>
-            <div class="contact-status">${data.fromId}</div>
-        </div>
-        <div class="friend-request-actions">
-            <button class="btn-accept-friend">✓</button>
-            <button class="btn-decline-friend">✕</button>
-        </div>
-    `;
-
-    const acceptBtn = div.querySelector('.btn-accept-friend');
-    const declineBtn = div.querySelector('.btn-decline-friend');
-
-    acceptBtn.onclick = (e) => {
-        e.stopPropagation();
-        addedContacts.push(data.fromId);
-        socket.emit('accept-friend-request', { toId: data.fromId });
-        div.remove();
-        alert(t('friendAdded'));
-        socket.emit('refresh-users');
-    };
-
-    declineBtn.onclick = (e) => {
-        e.stopPropagation();
-        socket.emit('decline-friend-request', { toId: data.fromId });
-        div.remove();
-        friendRequests = friendRequests.filter(r => r.fromId !== data.fromId);
-    };
-
-    friendRequestsSection.appendChild(div);
-});
-
-socket.on('friend-request-accepted', (data) => {
-    if (!addedContacts.includes(data.fromId)) {
-        addedContacts.push(data.fromId);
+    if (mode === 'login') {
+        socket.emit('login', { username: user, password: pass });
+    } else {
+        socket.emit('register', { username: user, password: pass });
     }
-    socket.emit('refresh-users');
-});
 
-// ========== ЗВОНКИ ==========
+    username.value = '';
+    password.value = '';
+}
+
+// ========== Contacts & Messages ==========
+function loadContacts() {
+    socket.emit('get-users');
+}
+
+function updateContactsList(users) {
+    contactsList.innerHTML = '';
+    
+    if (!users || Object.keys(users).length === 0) {
+        contactsList.innerHTML = `<div style="padding: 16px; color: #65676b; text-align: center;">${translations[currentLanguage].noContacts}</div>`;
+        return;
+    }
+
+    Object.values(users).forEach(user => {
+        if (user.id !== currentUser.id) {
+            const contactItem = document.createElement('div');
+            contactItem.className = 'contact-item';
+            contactItem.dataset.id = user.id;
+            contactItem.dataset.name = user.username;
+            
+            const initial = user.username[0].toUpperCase();
+            
+            contactItem.innerHTML = `
+                <div class="contact-avatar">${initial}</div>
+                <div class="contact-info">
+                    <div class="contact-name">${user.username}</div>
+                    <div class="contact-id">${user.id}</div>
+                </div>
+            `;
+
+            contactItem.addEventListener('click', () => selectContact(user.id, user.username));
+            contactsList.appendChild(contactItem);
+        }
+    });
+}
+
+function selectContact(contactId, contactName) {
+    selectedContactId = contactId;
+    
+    document.querySelectorAll('.contact-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    event.currentTarget.classList.add('active');
+    
+    document.getElementById('chatTitle').textContent = contactName;
+    document.getElementById('chatStatus').textContent = `Chatting with ${contactName}`;
+    messagesContainer.innerHTML = '';
+}
+
+function sendMessage() {
+    const text = messageInput.value.trim();
+    
+    if (!text) return;
+    if (!selectedContactId) {
+        alert('Please select a contact first');
+        return;
+    }
+
+    socket.emit('private-message', {
+        to: selectedContactId,
+        text: text
+    });
+
+    renderMessage(currentUser.username, text, 'own');
+    messageInput.value = '';
+}
+
+function sendImage() {
+    if (!selectedContactId) {
+        alert('Please select a contact first');
+        return;
+    }
+
+    const file = imageInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const imageData = e.target.result;
+        socket.emit('image-message', {
+            to: selectedContactId,
+            imageData: imageData
+        });
+        renderImage(imageData, 'own', currentUser.username);
+    };
+    reader.readAsDataURL(file);
+    imageInput.value = '';
+}
+
+function renderMessage(name, text, side) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${side}`;
+    
+    const now = new Date();
+    const time = now.getHours().toString().padStart(2, '0') + ':'// ========== Translation Object ==========
+const translations = {
+    en: {
+        loginSubtitle: "Connect instantly, message securely",
+        login: "Login",
+        register: "Register",
+        username: "Username (3-20 characters)",
+        password: "Password (4-50 characters)",
+        loginBtn: "Login",
+        registerBtn: "Register",
+        welcome: "Welcome",
+        selectContact: "Select a contact to start chatting",
+        typeMessage: "Type a message...",
+        settings: "Settings",
+        language: "Language",
+        languageDesc: "English",
+        profile: "Profile",
+        profileDesc: "Manage your ID",
+        about: "About",
+        aboutDesc: "Version 1.0.0",
+        selectLanguage: "Select Language",
+        changeId: "Change ID",
+        addContact: "Add Contact",
+        change: "Change",
+        add: "Add",
+        invalidId: "ID must be 3-6 characters (letters and numbers)",
+        idChanged: "ID updated successfully",
+        contactAdded: "Contact added",
+        contactNotFound: "Contact not found",
+        incomingCall: "Incoming Call",
+        audioCall: "Audio Call",
+        videoCall: "Video Call",
+        accept: "Accept",
+        decline: "Decline",
+        endCall: "End Call",
+        noContacts: "No contacts yet",
+        errorLogin: "Login failed. Check credentials.",
+        errorRegister: "Registration failed. Username may be taken.",
+        microphone: "Mute Microphone",
+        camera: "Turn Off Camera",
+        screenShare: "Share Screen",
+        friendRequest: "Friend Request",
+        from: "from",
+        send: "Send",
+        search: "Search ID or name..."
+    },
+    ru: {
+        loginSubtitle: "Общайтесь мгновенно, безопасно",
+        login: "Вход",
+        register: "Регистрация",
+        username: "Имя пользователя (3-20 символов)",
+        password: "Пароль (4-50 символов)",
+        loginBtn: "Вход",
+        registerBtn: "Регистрация",
+        welcome: "Добро пожаловать",
+        selectContact: "Выберите контакт для начала общения",
+        typeMessage: "Введите сообщение...",
+        settings: "Настройки",
+        language: "Язык",
+        languageDesc: "Русский",
+        profile: "Профиль",
+        profileDesc: "Управляйте вашим ID",
+        about: "О приложении",
+        aboutDesc: "Версия 1.0.0",
+        selectLanguage: "Выберите язык",
+        changeId: "Изменить ID",
+        addContact: "Добавить контакт",
+        change: "Изменить",
+        add: "Добавить",
+        invalidId: "ID должен быть 3-6 символов (буквы и цифры)",
+        idChanged: "ID успешно обновлён",
+        contactAdded: "Контакт добавлен",
+        contactNotFound: "Контакт не найден",
+        incomingCall: "Входящий звонок",
+        audioCall: "Аудиозвонок",
+        videoCall: "Видеозвонок",
+        accept: "Принять",
+        decline: "Отклонить",
+        endCall: "Завершить",
+        noContacts: "Контактов еще нет",
+        errorLogin: "Ошибка входа. Проверьте учетные данные.",
+        errorRegister: "Ошибка регистрации. Имя пользователя может быть занято.",
+        microphone: "Отключить микрофон",
+        camera: "Отключить камеру",
+        screenShare: "Общий доступ к экрану",
+        friendRequest: "Запрос дружбы",
+        from: "от",
+        send: "Отправить",
+        search: "Поиск ID или имени..."
+    }
+};
+
+// ========== Global Variables ==========
+let socket;
+let currentUser = null;
+let currentLanguage = 'en';
+let selectedContactId = null;
+let peerConnection = null;
+let localStream = null;
+let isCallActive = false;
+let isMicMuted = false;
+let isCameraOff = false;
+let isScreenSharing = false;
+let screenTrack = null;
+
 const STUN_SERVERS = [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' }
+    { urls: ['stun:stun.l.google.com:19302'] },
+    { urls: ['stun:stun1.l.google.com:19302'] }
 ];
 
-async function initiateCall(isVideo) {
-    if (!currentChat) {
-        alert(t('selectContactForCall'));
-        return;
-    }
+// ========== DOM Elements ==========
+const loginScreen = document.getElementById('loginScreen');
+const chatScreen = document.getElementById('chatScreen');
+const authForm = document.getElementById('authForm');
+const username = document.getElementById('username');
+const password = document.getElementById('password');
+const authError = document.getElementById('authError');
+const loginTab = document.getElementById('loginTab');
+const registerTab = document.getElementById('registerTab');
+const authButton = document.getElementById('authButton');
+const contactsList = document.getElementById('contactsList');
+const messagesContainer = document.getElementById('messagesContainer');
+const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+const imageBtn = document.getElementById('imageBtn');
+const imageInput = document.getElementById('imageInput');
+const callBtn = document.getElementById('callBtn');
+const videoBtn = document.getElementById('videoBtn');
+const settingsBtn = document.getElementById('settingsBtn');
+const searchInput = document.getElementById('searchInput');
 
-    try {
-        const constraints = {
-            audio: true,
-            video: isVideo ? { width: 640, height: 480 } : false
-        };
+// Modal Elements
+const settingsModal = document.getElementById('settingsModal');
+const languagesModal = document.getElementById('languagesModal');
+const profileModal = document.getElementById('profileModal');
+const callModal = document.getElementById('callModal');
+const incomingCallModal = document.getElementById('incomingCallModal');
 
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
-        document.getElementById('localVideo').srcObject = localStream;
-        
-        peerConnection = new RTCPeerConnection({ iceServers: STUN_SERVERS });
-        
-        localStream.getTracks().forEach(track => {
-            peerConnection.addTrack(track, localStream);
-        });
+// ========== Initialization ==========
+document.addEventListener('DOMContentLoaded', () => {
+    initializeChat();
+    setupEventListeners();
+});
 
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                socket.emit('ice-candidate', {
-                    to: currentChat.id,
-                    candidate: event.candidate
-                });
+function initializeChat() {
+    socket = io();
+
+    // Socket Events
+    socket.on('connect', () => {
+        console.log('Connected to server');
+    });
+
+    socket.on('login-success', (data) => {
+        currentUser = data;
+        console.log('User logged in:', currentUser);
+        loginScreen.classList.remove('active');
+        chatScreen.classList.add('active');
+        updateProfileDisplay();
+        loadContacts();
+    });
+
+    socket.on('register-success', (data) => {
+        currentUser = data;
+        console.log('User registered:', currentUser);
+        loginScreen.classList.remove('active');
+        chatScreen.classList.add('active');
+        updateProfileDisplay();
+    });
+
+    socket.on('auth-error', (message) => {
+        authError.textContent = message;
+    });
+
+    socket.on('user-list', (users) => {
+        updateContactsList(users);
+    });
+
+    socket.on('refresh-users', (users) => {
+        updateContactsList(users);
+    });
+
+    socket.on('private-message', (data) => {
+        if (data.from === selectedContactId || selectedContactId === null) {
+            renderMessage(data.fromName, data.text, 'other');
+        }
+    });
+
+    socket.on('image-message', (data) => {
+        renderImage(data.imageData, 'other', data.fromName);
+    });
+
+    socket.on('friend-request', (data) => {
+        showFriendRequestNotification(data);
+    });
+
+    socket.on('friend-request-accepted', (data) => {
+        console.log('Friend request accepted by', data.fromName);
+    });
+
+    socket.on('incoming-audio-call', (data) => {
+        handleIncomingCall(data, 'audio');
+    });
+
+    socket.on('incoming-video-call', (data) => {
+        handleIncomingCall(data, 'video');
+    });
+
+    socket.on('call-offer', async (data) => {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        socket.emit('call-answer', { to: data.from, answer: answer });
+    });
+
+    socket.on('call-answer', async (data) => {
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+    });
+
+    socket.on('ice-candidate', async (data) => {
+        try {
+            if (data.candidate) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
             }
-        };
+        } catch (err) {
+            console.error('Error adding ICE candidate:', err);
+        }
+    });
 
-        peerConnection.ontrack = (event) => {
-            document.getElementById('remoteVideo').srcObject = event.streams[0];
-        };
+    socket.on('end-call', () => {
+        endCall();
+    });
 
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
+    // Modal Navigation
+    const settingsItems = document.querySelectorAll('.settings-item');
+    settingsItems[0].onclick = () => {
+        settingsModal.classList.remove('active');
+        languagesModal.classList.add('active');
+    };
+    settingsItems[1].onclick = () => {
+        settingsModal.classList.remove('active');
+        profileModal.classList.add('active');
+    };
 
-        const callType = currentChat.type === 'group' ? (isVideo ? 'group-video-call' : 'group-audio-call') : (isVideo ? 'video-call' : 'audio-call');
-        socket.emit(callType, {
-            to: currentChat.id,
-            offer: offer
-        });
-
-        document.getElementById('callModal').classList.add('active');
-        document.getElementById('callTitle').textContent = `Звонок ${currentChat.shortId || 'группе'}...`;
-        document.getElementById('answerCallBtn').style.display = 'none';
-
-    } catch (err) {
-        console.error('Ошибка звонка:', err);
-        alert(t('callError') + err.message);
-    }
-}
-
-async function toggleScreenShare() {
-    if (!peerConnection) {
-        alert('Нет активного звонка');
-        return;
-    }
-
-    try {
-        if (isScreenSharing) {
-            screenStream.getTracks().forEach(track => track.stop());
+    // Language Selection
+    const languageOptions = document.querySelectorAll('.language-option');
+    languageOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            const lang = this.dataset.lang;
+            currentLanguage = lang;
             
-            const videoTrack = localStream.getVideoTracks()[0];
-            const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-            if (sender) {
-                await sender.replaceTrack(videoTrack);
-            }
-            
-            isScreenSharing = false;
-            document.getElementById('toggleScreenBtn').style.opacity = '1';
-        } else {
-            screenStream = await navigator.mediaDevices.getDisplayMedia({ 
-                video: { cursor: 'always' },
-                audio: false 
+            // Update checkmarks
+            document.querySelectorAll('.language-check').forEach(check => {
+                check.textContent = '';
             });
+            document.getElementById(`check-${lang}`).textContent = '✓';
             
-            const screenTrack = screenStream.getVideoTracks()[0];
-            const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-            if (sender) {
-                await sender.replaceTrack(screenTrack);
+            updateAllLanguageText();
+        });
+    });
+
+    // Profile Actions
+    const changeIdBtn = document.getElementById('changeIdBtn');
+    changeIdBtn.addEventListener('click', changeUserID);
+
+    const addContactBtn = document.getElementById('addContactBtn');
+    addContactBtn.addEventListener('click', addContact);
+
+    // Modal Close Buttons
+    document.querySelectorAll('.modal-close').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modalId = this.getAttribute('data-modal');
+            if (modalId) {
+                document.getElementById(modalId).classList.remove('active');
             }
-            
-            isScreenSharing = true;
-            document.getElementById('toggleScreenBtn').style.opacity = '0.5';
-            
-            screenTrack.onended = async () => {
-                const videoTrack = localStream.getVideoTracks()[0];
-                if (videoTrack) {
-                    await sender.replaceTrack(videoTrack);
-                    isScreenSharing = false;
-                    document.getElementById('toggleScreenBtn').style.opacity = '1';
-                }
-            };
-        }
-    } catch (err) {
-        console.error('Ошибка показа экрана:', err);
-        alert('Ошибка при показе экрана: ' + err.message);
-    }
+        });
+    });
+
+    // Modal Back Buttons
+    document.querySelectorAll('.modal-back').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const backTo = this.getAttribute('data-back-to');
+            if (backTo) {
+                document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+                document.getElementById(backTo).classList.add('active');
+            }
+        });
+    });
+
+    updateAllLanguageText();
 }
 
-function endCall() {
-    if (localStream) {
-        localStream.getTracks().forEach(track => track.stop());
-    }
-    if (screenStream) {
-        screenStream.getTracks().forEach(track => track.stop());
-    }
-    if (peerConnection) {
-        peerConnection.close();
-    }
-    document.getElementById('callModal').classList.remove('active');
-    document.getElementById('remoteVideo').srcObject = null;
-    document.getElementById('localVideo').srcObject = null;
-    document.getElementById('toggleScreenBtn').style.opacity = '1';
-    isScreenSharing = false;
-    if (currentChat) {
-        socket.emit('end-call', { to: currentChat.id });
-    }
+function setupEventListeners() {
+    // Auth Form
+    loginTab.addEventListener('click', () => {
+        switchAuthMode('login');
+    });
+
+    registerTab.addEventListener('click', () => {
+        switchAuthMode('register');
+    });
+
+    authForm.addEventListener('submit', handleAuthSubmit);
+
+    // Chat Events
+    sendBtn.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    imageBtn.addEventListener('click', () => {
+        imageInput.click();
+    });
+
+    imageInput.addEventListener('change', sendImage);
+
+    // Call Buttons
+    callBtn.addEventListener('click', () => initiateCall(false));
+    videoBtn.addEventListener('click', () => initiateCall(true));
+
+    // Settings
+    settingsBtn.addEventListener('click', () => {
+        settingsModal.classList.add('active');
+    });
+
+    // Search
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        const contactItems = document.querySelectorAll('.contact-item');
+        
+        contactItems.forEach(item => {
+            const name = item.dataset.name.toLowerCase();
+            const id = item.dataset.id.toLowerCase();
+            
+            if (name.includes(query) || id.includes(query)) {
+                item.style.display = '';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+
+    // Incoming Call Buttons
+    document.getElementById('acceptCallBtn').addEventListener('click', acceptCall);
+    document.getElementById('declineCallBtn').addEventListener('click', declineCall);
+
+    // Call Controls
+    document.getElementById('toggleMicBtn').addEventListener('click', toggleMicrophone);
+    document.getElementById('toggleCameraBtn').addEventListener('click', toggleCamera);
+    document.getElementById('toggleScreenBtn').addEventListener('click', toggleScreenShare);
+    document.getElementById('endCallBtn').addEventListener('click', endCall);
 }
 
-// ВХОДЯЩИЙ ЗВОНОК
-socket.on('incoming-audio-call', (data) => {
-    incomingCall = {
-        ...data,
-        from: data.from,
-        isVideo: false
-    };
-    document.getElementById('incomingCallName').textContent = data.from;
-    document.getElementById('incomingCallModal').classList.add('active');
-});
+// ========== Authentication ==========
+function switchAuthMode(mode) {
+    const isLogin = mode === 'login';
+    
+    loginTab.classList.toggle('active', isLogin);
+    registerTab.classList.toggle('active', !isLogin);
+    
+    authButton.textContent = isLogin ? 
+        translations[currentLanguage].loginBtn : 
+        translations[currentLanguage].registerBtn;
+    
+    authForm.dataset.mode = mode;
+    authError.textContent = '';
+}
 
-socket.on('incoming-video-call', (data) => {
-    incomingCall = {
-        ...data,
-        from: data.from,
-        isVideo: true
-    };
-    document.getElementById('incomingCallName').textContent = data.from;
-    document.getElementById('incomingCallModal').classList.add('active');
-});
+function handleAuthSubmit(e) {
+    e.preventDefault();
+    
+    const user = username.value.trim();
+    const pass = password.value.trim();
+    const mode = authForm.dataset.mode || 'login';
 
-socket.on('incoming-group-audio-call', (data) => {
-    incomingCall = {
-        ...data,
-        from: data.from,
-        isVideo: false,
-        isGroup: true
-    };
-    document.getElementById('incomingCallName').textContent = `${data.from} (групповой звонок)`;
-    document.getElementById('incomingCallModal').classList.add('active');
-});
-
-socket.on('incoming-group-video-call', (data) => {
-    incomingCall = {
-        ...data,
-        from: data.from,
-        isVideo: true,
-        isGroup: true
-    };
-    document.getElementById('incomingCallName').textContent = `${data.from} (групповой видеозвонок)`;
-    document.getElementById('incomingCallModal').classList.add('active');
-});
-
-// ОБРАБОТКА ОТВЕТА
-socket.on('call-answered', async (data) => {
-    try {
-        if (peerConnection) {
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-        }
-    } catch (err) {
-        console.error('Ошибка при установке ответа:', err);
+    if (!user || !pass) {
+        authError.textContent = 'Please fill in all fields';
+        return;
     }
-});
 
-// ICE КАНДИДАТЫ
-socket.on('ice-candidate', async (data) => {
-    try {
-        if (peerConnection && data.candidate) {
-            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-        }
-    } catch (err) {
-        console.error('Ошибка ICE:', err);
+    if (mode === 'login') {
+        socket.emit('login', { username: user, password: pass });
+    } else {
+        socket.emit('register', { username: user, password: pass });
     }
-});
 
-// ЗАВЕРШЕНИЕ ЗВОНКА
-socket.on('call-ended', () => {
-    endCall();
-    alert(t('callEnded'));
-});
+    username.value = '';
+    password.value = '';
+}
 
-socket.on('call-declined', () => {
-    endCall();
-    alert(t('callDeclined'));
-});
+// ========== Contacts & Messages ==========
+function loadContacts() {
+    socket.emit('get-users');
+}
+
+function updateContactsList(users) {
+    contactsList.innerHTML = '';
+    
+    if (!users || Object.keys(users).length === 0) {
+        contactsList.innerHTML = `<div style="padding: 16px; color: #65676b; text-align: center;">${translations[currentLanguage].noContacts}</div>`;
+        return;
+    }
+
+    Object.values(users).forEach(user => {
+        if (user.id !== currentUser.id) {
+            const contactItem = document.createElement('div');
+            contactItem.className = 'contact-item';
+            contactItem.dataset.id = user.id;
+            contactItem.dataset.name = user.username;
+            
+            const initial = user.username[0].toUpperCase();
+            
+            contactItem.innerHTML = `
+                <div class="contact-avatar">${initial}</div>
+                <div class="contact-info">
+                    <div class="contact-name">${user.username}</div>
+                    <div class="contact-id">${user.id}</div>
+                </div>
+            `;
+
+            contactItem.addEventListener('click', () => selectContact(user.id, user.username));
+            contactsList.appendChild(contactItem);
+        }
+    });
+}
+
+function selectContact(contactId, contactName) {
+    selectedContactId = contactId;
+    
+    document.querySelectorAll('.contact-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    event.currentTarget.classList.add('active');
+    
+    document.getElementById('chatTitle').textContent = contactName;
+    document.getElementById('chatStatus').textContent = `Chatting with ${contactName}`;
+    messagesContainer.innerHTML = '';
+}
+
+function sendMessage() {
+    const text = messageInput.value.trim();
+    
+    if (!text) return;
+    if (!selectedContactId) {
+        alert('Please select a contact first');
+        return;
+    }
+
+    socket.emit('private-message', {
+        to: selectedContactId,
+        text: text
+    });
+
+    renderMessage(currentUser.username, text, 'own');
+    messageInput.value = '';
+}
+
+function sendImage() {
+    if (!selectedContactId) {
+        alert('Please select a contact first');
+        return;
+    }
+
+    const file = imageInput.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const imageData = e.target.result;
+        socket.emit('image-message', {
+            to: selectedContactId,
+            imageData: imageData
+        });
+        renderImage(imageData, 'own', currentUser.username);
+    };
+    reader.readAsDataURL(file);
+    imageInput.value = '';
+}
+
+function renderMessage(name, text, side) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${side}`;
+    
+    const now = new Date();
+    const time = now.getHours().toString().padStart(2, '0') + ':'

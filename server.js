@@ -38,6 +38,12 @@ function writeDB(data) {
     }
 }
 
+// Генерируем уникальный ID для пользователя
+function generateShortId(username) {
+    // Использует имя пользователя + случайные цифры
+    return username.substring(0, 3).toUpperCase() + Math.floor(100 + Math.random() * 900);
+}
+
 // Валидация username и password
 function validateInput(user, pass) {
     if (typeof user !== 'string' || typeof pass !== 'string') {
@@ -72,14 +78,21 @@ io.on('connection', (socket) => {
                 return socket.emit('auth-error', 'Пользователь не найден');
             }
 
-            // Сравниваем хэширование пароля
+            // Сравниваем хэшированный пароль
             const isPasswordValid = await bcrypt.compare(data.pass, db.users[data.user].hash);
             
             if (!isPasswordValid) {
                 return socket.emit('auth-error', 'Неверный пароль');
             }
 
-            const shortId = data.user.substring(0, 3).toUpperCase() + Math.floor(100 + Math.random() * 900);
+            // Получаем сохраненный ID или создаем новый
+            let shortId = db.users[data.user].shortId;
+            if (!shortId) {
+                shortId = generateShortId(data.user);
+                db.users[data.user].shortId = shortId;
+                writeDB(db);
+            }
+
             onlineUsers[socket.id] = { 
                 name: data.user, 
                 shortId: shortId,
@@ -88,7 +101,7 @@ io.on('connection', (socket) => {
 
             socket.emit('auth-success', { shortId });
             updateUserList();
-            console.log(`${data.user} успешно вошел`);
+            console.log(`${data.user} успешно вошел с ID: ${shortId}`);
 
         } catch (err) {
             console.error('Ошибка логина:', err);
@@ -110,13 +123,18 @@ io.on('connection', (socket) => {
                 return socket.emit('auth-error', 'Пользователь уже существует');
             }
 
-            // Хэшируем пароль перед сохранением
+            // Генерируем ID при регистрации и хэшируем пароль
+            const shortId = generateShortId(data.user);
             const hash = await bcrypt.hash(data.pass, SALT_ROUNDS);
-            db.users[data.user] = { hash, createdAt: new Date() };
+            db.users[data.user] = { 
+                hash, 
+                shortId: shortId,
+                createdAt: new Date() 
+            };
             
             if (writeDB(db)) {
                 socket.emit('auth-success-register', 'Регистрация успешна! Теперь войдите.');
-                console.log(`Новый пользователь зарегистрирован: ${data.user}`);
+                console.log(`Новый пользователь: ${data.user} с ID: ${shortId}`);
             } else {
                 socket.emit('auth-error', 'Ошибка при сохранении');
             }
@@ -134,7 +152,7 @@ io.on('connection', (socket) => {
                 return socket.emit('msg-error', 'Некорректные данные сообщения');
             }
 
-            const text = d.text.trim().substring(0, 500); // Ограничиваем размер
+            const text = d.text.trim().substring(0, 500);
             if (!text) return;
 
             const sender = onlineUsers[socket.id];
@@ -149,12 +167,10 @@ io.on('connection', (socket) => {
                 type: 'private'
             };
 
-            // Сохраняем в БД
             const db = readDB();
             db.messages.push(message);
             writeDB(db);
 
-            // Отправляем получателю
             socket.to(d.to).emit('receive-msg', {
                 name: sender.name,
                 text: text,
@@ -189,12 +205,10 @@ io.on('connection', (socket) => {
                 type: 'group'
             };
 
-            // Сохраняем в БД
             const db = readDB();
             db.messages.push(message);
             writeDB(db);
 
-            // Отправляем всем
             io.emit('receive-msg', {
                 name: sender.name,
                 text: text,

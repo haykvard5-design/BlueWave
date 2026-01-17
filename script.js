@@ -63,13 +63,46 @@ function t(key) {
     return translations[currentLanguage][key] || key;
 }
 
-// ========== ЭКРАН ВХОДА ==========
+// ========== ИНИЦИАЛИЗАЦИЯ ==========
+window.addEventListener('DOMContentLoaded', () => {
+    initializeAuth();
+    initializeLanguage();
+    initializeChat();
+});
 
-// Переключение между входом и регистрацией
-document.getElementById('toggleAuthBtn').onclick = () => {
+function initializeAuth() {
+    const loginBtn = document.getElementById('loginBtn');
+    const toggleBtn = document.getElementById('toggleAuthBtn');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+
+    if (loginBtn) {
+        loginBtn.onclick = handleAuthSubmit;
+    }
+
+    if (toggleBtn) {
+        toggleBtn.onclick = toggleAuthMode;
+    }
+
+    if (usernameInput) {
+        usernameInput.onkeypress = (e) => {
+            if (e.key === 'Enter') handleAuthSubmit();
+        };
+    }
+
+    if (passwordInput) {
+        passwordInput.onkeypress = (e) => {
+            if (e.key === 'Enter') handleAuthSubmit();
+        };
+    }
+
+    updateAuthScreen();
+}
+
+function toggleAuthMode() {
     isRegisterMode = !isRegisterMode;
     updateAuthScreen();
-};
+}
 
 function updateAuthScreen() {
     const loginBtn = document.getElementById('loginBtn');
@@ -87,8 +120,7 @@ function updateAuthScreen() {
     }
 }
 
-// Логин / Регистрация
-document.getElementById('loginBtn').onclick = () => {
+function handleAuthSubmit() {
     const user = document.getElementById('username').value.trim();
     const pass = document.getElementById('password').value.trim();
     
@@ -98,25 +130,227 @@ document.getElementById('loginBtn').onclick = () => {
     }
 
     const action = isRegisterMode ? 'register' : 'login';
+    console.log(`Отправка ${action}:`, { user });
     socket.emit(action, { user, pass });
-};
+}
 
-// СМЕНА ЯЗЫКА
-document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        currentLanguage = this.dataset.lang;
-        updateLanguage();
+function initializeLanguage() {
+    const langBtns = document.querySelectorAll('.lang-btn');
+    langBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            langBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentLanguage = this.dataset.lang;
+            updateLanguage();
+        });
     });
-});
+}
 
 function updateLanguage() {
     updateAuthScreen();
 }
 
-// ОБРАБОТКА ЛОГИНА
+function initializeChat() {
+    // НАСТРОЙКИ
+    const settingsBtn = document.getElementById('settingsBtn');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+
+    if (settingsBtn) {
+        settingsBtn.onclick = () => {
+            document.getElementById('settingsModal').classList.add('active');
+        };
+    }
+
+    if (closeSettingsBtn) {
+        closeSettingsBtn.onclick = () => {
+            document.getElementById('settingsModal').classList.remove('active');
+        };
+    }
+
+    // Закрытие модалки при клике на фон
+    window.onclick = (e) => {
+        const settingsModal = document.getElementById('settingsModal');
+        const incomingCallModal = document.getElementById('incomingCallModal');
+        
+        if (e.target === settingsModal) {
+            settingsModal.classList.remove('active');
+        }
+        if (e.target === incomingCallModal) {
+            incomingCallModal.classList.remove('active');
+        }
+    };
+
+    // ДОБАВЛЕНИЕ КОНТАКТА
+    const addContactBtn = document.getElementById('addContactBtn');
+    if (addContactBtn) {
+        addContactBtn.onclick = () => {
+            const id = document.getElementById('addContactId').value.trim().toUpperCase();
+            
+            if (!id) {
+                alert('Введите ID');
+                return;
+            }
+            
+            if (id === myShortId) {
+                alert('Это ваш ID');
+                return;
+            }
+            
+            if (addedContacts.includes(id)) {
+                alert('Контакт уже добавлен');
+                return;
+            }
+            
+            addedContacts.push(id);
+            document.getElementById('addContactId').value = '';
+            socket.emit('refresh-users');
+            alert(`Контакт ${id} добавлен!`);
+        };
+    }
+
+    // ОТПРАВКА СООБЩЕНИЯ
+    const sendBtn = document.getElementById('sendBtn');
+    const messageInput = document.getElementById('messageInput');
+
+    if (sendBtn) {
+        sendBtn.onclick = sendMessage;
+    }
+
+    if (messageInput) {
+        messageInput.onkeypress = (e) => {
+            if (e.key === 'Enter') sendMessage();
+        };
+    }
+
+    // ГЛОБАЛЬНАЯ ГРУППА
+    const globalGroupBtn = document.getElementById('globalGroupBtn');
+    if (globalGroupBtn) {
+        globalGroupBtn.onclick = () => {
+            openChat('global', 'BlueWave Group', 'group');
+            document.querySelectorAll('.group-item, .contact-item').forEach(el => {
+                el.classList.remove('active');
+            });
+            globalGroupBtn.classList.add('active');
+        };
+    }
+
+    // ЗВОНКИ
+    const callBtn = document.getElementById('callBtn');
+    const videoCallBtn = document.getElementById('videoCallBtn');
+
+    if (callBtn) {
+        callBtn.onclick = () => initiateCall(false);
+    }
+
+    if (videoCallBtn) {
+        videoCallBtn.onclick = () => initiateCall(true);
+    }
+
+    // УПРАВЛЕНИЕ МИКРОФОНОМ
+    const toggleMicBtn = document.getElementById('toggleMicBtn');
+    if (toggleMicBtn) {
+        toggleMicBtn.onclick = () => {
+            const audioTracks = localStream?.getAudioTracks() || [];
+            
+            if (audioTracks.length > 0) {
+                audioTracks[0].enabled = !audioTracks[0].enabled;
+                toggleMicBtn.classList.toggle('off');
+                toggleMicBtn.style.opacity = audioTracks[0].enabled ? '1' : '0.5';
+            }
+        };
+    }
+
+    // УПРАВЛЕНИЕ КАМЕРОЙ
+    const toggleCameraBtn = document.getElementById('toggleCameraBtn');
+    if (toggleCameraBtn) {
+        toggleCameraBtn.onclick = () => {
+            const videoTracks = localStream?.getVideoTracks() || [];
+            
+            if (videoTracks.length > 0) {
+                videoTracks[0].enabled = !videoTracks[0].enabled;
+                toggleCameraBtn.classList.toggle('off');
+                toggleCameraBtn.style.opacity = videoTracks[0].enabled ? '1' : '0.5';
+            }
+        };
+    }
+
+    // ЗАВЕРШЕНИЕ ЗВОНКА
+    const endCallBtn = document.getElementById('endCallBtn');
+    if (endCallBtn) {
+        endCallBtn.onclick = () => {
+            endCall();
+        };
+    }
+
+    // ОТВЕТИТЬ НА ЗВОНОК
+    const acceptBtn = document.getElementById('acceptBtn');
+    if (acceptBtn) {
+        acceptBtn.onclick = async () => {
+            document.getElementById('incomingCallModal').classList.remove('active');
+            document.getElementById('callModal').classList.add('active');
+            
+            try {
+                const constraints = { audio: true, video: incomingCall.isVideo };
+                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                document.getElementById('localVideo').srcObject = localStream;
+                
+                peerConnection = new RTCPeerConnection({ iceServers: STUN_SERVERS });
+                
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        socket.emit('ice-candidate', {
+                            to: incomingCall.from,
+                            candidate: event.candidate
+                        });
+                    }
+                };
+
+                peerConnection.ontrack = (event) => {
+                    document.getElementById('remoteVideo').srcObject = event.streams[0];
+                };
+
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+
+                socket.emit('answer-call', {
+                    to: incomingCall.from,
+                    answer: answer
+                });
+
+            } catch (err) {
+                console.error('Ошибка при ответе:', err);
+                endCall();
+            }
+        };
+    }
+
+    // ОТКЛОНИТЬ ЗВОНОК
+    const declineBtn = document.getElementById('declineBtn');
+    if (declineBtn) {
+        declineBtn.onclick = () => {
+            document.getElementById('incomingCallModal').classList.remove('active');
+            socket.emit('decline-call', { to: incomingCall.from });
+        };
+    }
+}
+
+// ========== ОБРАБОТКА SOCKET СОБЫТИЙ ==========
+
+socket.on('connect', () => {
+    console.log('Подключено к серверу');
+});
+
+socket.on('disconnect', () => {
+    console.log('Отключено от сервера');
+});
+
 socket.on('auth-success', (data) => {
+    console.log('Вход успешен:', data);
     myShortId = data.shortId;
     myName = data.userName || 'User';
     document.getElementById('auth-screen').style.display = 'none';
@@ -128,10 +362,12 @@ socket.on('auth-success', (data) => {
 });
 
 socket.on('auth-error', (msg) => {
+    console.log('Ошибка входа:', msg);
     alert('Ошибка: ' + msg);
 });
 
 socket.on('auth-success-register', (msg) => {
+    console.log('Регистрация успешна');
     alert(msg);
     isRegisterMode = false;
     updateAuthScreen();
@@ -155,7 +391,13 @@ socket.on('update-users', (users) => {
                     <div class="contact-status">${user.shortId}</div>
                 </div>
             `;
-            div.onclick = () => openChat(user.socketId, user.name, 'private', user.shortId);
+            div.onclick = () => {
+                document.querySelectorAll('.contact-item, .group-item').forEach(el => {
+                    el.classList.remove('active');
+                });
+                div.classList.add('active');
+                openChat(user.socketId, user.name, 'private', user.shortId);
+            };
             contactsList.appendChild(div);
         }
     });
@@ -165,30 +407,13 @@ socket.on('update-users', (users) => {
 function openChat(id, name, type, shortId) {
     currentChat = { id, type, shortId };
     
-    document.querySelectorAll('.contact-item, .group-item').forEach(el => {
-        el.classList.remove('active');
-    });
-    if (event?.target?.closest('.contact-item, .group-item')) {
-        event.target.closest('.contact-item, .group-item').classList.add('active');
-    }
-    
     document.getElementById('chatTitle').textContent = name;
-    document.getElementById('chatStatus').textContent = t('online');
+    document.getElementById('chatStatus').textContent = 'Online';
     document.getElementById('messagesContainer').innerHTML = '';
     document.getElementById('messageInput').focus();
 }
 
-// ГЛОБАЛЬНАЯ ГРУППА
-document.getElementById('globalGroupBtn').onclick = () => {
-    openChat('global', 'BlueWave Group', 'group');
-};
-
 // ОТПРАВКА СООБЩЕНИЯ
-document.getElementById('sendBtn').onclick = sendMessage;
-document.getElementById('messageInput').onkeypress = (e) => {
-    if (e.key === 'Enter') sendMessage();
-};
-
 function sendMessage() {
     const text = document.getElementById('messageInput').value.trim();
     if (!text || !currentChat) return;
@@ -232,47 +457,12 @@ function renderMessage(name, text, side) {
     container.scrollTop = container.scrollHeight;
 }
 
-// НАСТРОЙКИ
-document.getElementById('settingsBtn').onclick = () => {
-    document.getElementById('settingsModal').classList.add('active');
-};
-
-document.getElementById('closeSettingsBtn').onclick = () => {
-    document.getElementById('settingsModal').classList.remove('active');
-};
-
-// ДОБАВЛЕНИЕ КОНТАКТА
-document.getElementById('addContactBtn').onclick = () => {
-    const id = document.getElementById('addContactId').value.trim().toUpperCase();
-    
-    if (!id) {
-        alert('Введите ID');
-        return;
-    }
-    
-    if (id === myShortId) {
-        alert('Это ваш ID');
-        return;
-    }
-    
-    if (addedContacts.includes(id)) {
-        alert('Контакт уже добавлен');
-        return;
-    }
-    
-    addedContacts.push(id);
-    document.getElementById('addContactId').value = '';
-    socket.emit('refresh-users');
-    alert(`Контакт ${id} добавлен!`);
-};
-
 // ========== ЗВОНКИ ==========
 const STUN_SERVERS = [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' }
 ];
 
-// ИНИЦИИРОВАНИЕ ЗВОНКА
 async function initiateCall(isVideo) {
     if (!currentChat || currentChat.type === 'group') {
         alert('Выберите контакт');
@@ -321,42 +511,9 @@ async function initiateCall(isVideo) {
 
     } catch (err) {
         console.error('Ошибка звонка:', err);
-        alert('Ошибка при инициировании звонка');
+        alert('Ошибка при инициировании звонка: ' + err.message);
     }
 }
-
-// КНОПКИ ЗВОНКОВ
-document.getElementById('callBtn').onclick = () => initiateCall(false);
-document.getElementById('videoCallBtn').onclick = () => initiateCall(true);
-
-// УПРАВЛЕНИЕ МИКРОФОНОМ
-document.getElementById('toggleMicBtn').onclick = () => {
-    const btn = document.getElementById('toggleMicBtn');
-    const audioTracks = localStream?.getAudioTracks() || [];
-    
-    if (audioTracks.length > 0) {
-        audioTracks[0].enabled = !audioTracks[0].enabled;
-        btn.classList.toggle('off');
-        btn.style.opacity = audioTracks[0].enabled ? '1' : '0.5';
-    }
-};
-
-// УПРАВЛЕНИЕ КАМЕРОЙ
-document.getElementById('toggleCameraBtn').onclick = () => {
-    const btn = document.getElementById('toggleCameraBtn');
-    const videoTracks = localStream?.getVideoTracks() || [];
-    
-    if (videoTracks.length > 0) {
-        videoTracks[0].enabled = !videoTracks[0].enabled;
-        btn.classList.toggle('off');
-        btn.style.opacity = videoTracks[0].enabled ? '1' : '0.5';
-    }
-};
-
-// ЗАВЕРШЕНИЕ ЗВОНКА
-document.getElementById('endCallBtn').onclick = () => {
-    endCall();
-};
 
 function endCall() {
     if (localStream) {
@@ -368,76 +525,38 @@ function endCall() {
     document.getElementById('callModal').classList.remove('active');
     document.getElementById('remoteVideo').srcObject = null;
     document.getElementById('localVideo').srcObject = null;
-    socket.emit('end-call', { to: currentChat.id });
+    if (currentChat) {
+        socket.emit('end-call', { to: currentChat.id });
+    }
 }
 
 // ВХОДЯЩИЙ ЗВОНОК
 socket.on('incoming-audio-call', (data) => {
-    incomingCall = data;
+    incomingCall = {
+        ...data,
+        from: data.from,
+        isVideo: false
+    };
     document.getElementById('incomingCallName').textContent = data.from;
     document.getElementById('incomingCallModal').classList.add('active');
 });
 
 socket.on('incoming-video-call', (data) => {
-    incomingCall = data;
+    incomingCall = {
+        ...data,
+        from: data.from,
+        isVideo: true
+    };
     document.getElementById('incomingCallName').textContent = data.from;
     document.getElementById('incomingCallModal').classList.add('active');
 });
 
-// ОТВЕТИТЬ НА ЗВОНОК
-document.getElementById('acceptBtn').onclick = async () => {
-    document.getElementById('incomingCallModal').classList.remove('active');
-    document.getElementById('callModal').classList.add('active');
-    
-    try {
-        const constraints = { audio: true, video: incomingCall.isVideo };
-        localStream = await navigator.mediaDevices.getUserMedia(constraints);
-        document.getElementById('localVideo').srcObject = localStream;
-        
-        peerConnection = new RTCPeerConnection({ iceServers: STUN_SERVERS });
-        
-        localStream.getTracks().forEach(track => {
-            peerConnection.addTrack(track, localStream);
-        });
-
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
-                socket.emit('ice-candidate', {
-                    to: incomingCall.from,
-                    candidate: event.candidate
-                });
-            }
-        };
-
-        peerConnection.ontrack = (event) => {
-            document.getElementById('remoteVideo').srcObject = event.streams[0];
-        };
-
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(incomingCall.offer));
-        const answer = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answer);
-
-        socket.emit('answer-call', {
-            to: incomingCall.from,
-            answer: answer
-        });
-
-    } catch (err) {
-        console.error('Ошибка при ответе:', err);
-        endCall();
-    }
-};
-
-// ОТКЛОНИТЬ ЗВОНОК
-document.getElementById('declineBtn').onclick = () => {
-    document.getElementById('incomingCallModal').classList.remove('active');
-    socket.emit('decline-call', { to: incomingCall.from });
-};
-
 // ОБРАБОТКА ОТВЕТА
 socket.on('call-answered', async (data) => {
     try {
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+        if (peerConnection) {
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+        }
     } catch (err) {
         console.error('Ошибка при установке ответа:', err);
     }
@@ -463,3 +582,4 @@ socket.on('call-ended', () => {
 socket.on('call-declined', () => {
     endCall();
     alert('Звонок отклонен');
+});

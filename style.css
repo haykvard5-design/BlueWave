@@ -222,7 +222,8 @@ input:focus {
 }
 
 .contacts-section,
-.groups-section {
+.groups-section,
+.friend-requests-section {
     flex: 1;
     overflow-y: auto;
     padding: 8px 0;
@@ -910,7 +911,7 @@ input:focus {
     background: #999;
 }
 
-/* ========== МОБИЛЬНАЯ АДАПТИВНОСТЬ ========== */
+/* ========== АДАПТИВНОСТЬ ДЛЯ ПЛАНШЕТОВ ========== */
 @media (max-width: 900px) {
     .sidebar {
         width: 280px;
@@ -921,6 +922,7 @@ input:focus {
     }
 }
 
+/* ========== АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ УСТРОЙСТВ ========== */
 @media (max-width: 768px) {
     .chat-wrapper {
         flex-direction: column;
@@ -928,27 +930,92 @@ input:focus {
 
     .sidebar {
         width: 100%;
-        height: auto;
-        max-height: 35vh;
+        height: 200px;
         border-right: none;
         border-bottom: 1px solid #e5e5e5;
+        flex-direction: row;
     }
 
     .sidebar-header {
-        padding: 12px 16px;
+        flex: 0 0 auto;
+        padding: 12px;
+        border-bottom: none;
+        border-right: 1px solid #e5e5e5;
+        min-width: 180px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar-top {
+        margin-bottom: 10px;
     }
 
     .brand {
-        font-size: 22px;
+        font-size: 20px;
+    }
+
+    #searchInput {
+        display: none;
     }
 
     .contacts-section,
-    .groups-section {
-        max-height: 150px;
+    .groups-section,
+    .friend-requests-section {
+        max-height: 200px;
+        flex: 1;
+        padding: 8px;
+    }
+
+    .section-title {
+        padding: 6px 10px 4px;
+        font-size: 11px;
+    }
+
+    .contact-item,
+    .group-item,
+    .friend-request-item {
+        padding: 6px 8px;
+        margin: 2px 0;
+        border-radius: 8px;
+    }
+
+    .contact-avatar,
+    .group-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+        margin-right: 8px;
+    }
+
+    .contact-name {
+        font-size: 13px;
+    }
+
+    .contact-status {
+        font-size: 11px;
     }
 
     .chat-main {
-        height: 65vh;
+        height: calc(100vh - 200px);
+    }
+
+    .chat-header {
+        padding: 10px 12px;
+    }
+
+    .header-info h2 {
+        font-size: 13px;
+    }
+
+    .chat-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        margin-right: 10px;
+    }
+
+    .messages-container {
+        padding: 10px 12px;
     }
 
     .message-bubble {
@@ -973,6 +1040,7 @@ input:focus {
     #messageInput {
         padding: 9px 12px;
         font-size: 14px;
+        border-radius: 18px;
     }
 
     .btn-send,
@@ -980,20 +1048,13 @@ input:focus {
         width: 32px;
         height: 32px;
         font-size: 16px;
+        min-width: 32px;
     }
 
-    .chat-header {
-        padding: 10px 12px;
-    }
-
-    .header-info h2 {
+    .icon-btn {
+        width: 32px;
+        height: 32px;
         font-size: 14px;
-    }
-
-    .chat-avatar {
-        width: 40px;
-        height: 40px;
-        font-size: 20px;
     }
 
     #callVideoArea {
@@ -1010,65 +1071,165 @@ input:focus {
         height: 44px;
         font-size: 16px;
     }
+
+    .modal-content {
+        padding: 16px;
+        max-width: 90%;
+    }
 }
 
+/* ========== АДАПТИВНОСТЬ ДЛЯ МАЛЕНЬКИХ ТЕЛЕФОНОВ ========== */
 @media (max-width: 480px) {
-    .sidebar {
-        max-height: 30vh;
+    body {
+        padding: 0;
     }
 
-    .contacts-section,
-    .groups-section {
-        max-height: 100px;
+    .login-card {
+        width: 95%;
+        max-width: 320px;
+        padding: 25px 20px;
+        border-radius: 16px;
+    }
+
+    h2 {
+        font-size: 26px;
+    }
+
+    input {
+        padding: 12px;
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+
+    .btn-primary {
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    #chat-container {
+        flex-direction: column;
+    }
+
+    .chat-wrapper {
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 150px;
+        border-bottom: 1px solid #e5e5e5;
+        border-right: none;
+        flex-direction: column;
     }
 
     .sidebar-header {
         padding: 10px 12px;
+        border-bottom: 1px solid #e5e5e5;
+        border-right: none;
+        min-width: auto;
+    }
+
+    .sidebar-top {
+        margin-bottom: 8px;
     }
 
     .brand {
-        font-size: 20px;
+        font-size: 18px;
+    }
+
+    .settings-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 18px;
+    }
+
+    .contacts-section,
+    .groups-section,
+    .friend-requests-section {
+        max-height: 100px;
+        padding: 4px 0;
     }
 
     .section-title {
-        font-size: 11px;
-        padding: 6px 12px 2px;
+        padding: 4px 10px 2px;
+        font-size: 10px;
     }
 
     .contact-item,
-    .group-item {
-        padding: 6px 8px;
-        margin: 0 4px;
+    .group-item,
+    .friend-request-item {
+        padding: 5px 8px;
+        margin: 0;
+        border-radius: 6px;
     }
 
     .contact-avatar,
     .group-avatar {
-        width: 40px;
-        height: 40px;
-        font-size: 18px;
-        margin-right: 10px;
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        margin-right: 6px;
+    }
+
+    .contact-name {
+        font-size: 12px;
+    }
+
+    .contact-status {
+        font-size: 10px;
     }
 
     .chat-main {
-        height: 70vh;
+        height: calc(100vh - 150px);
+        width: 100%;
     }
 
     .chat-header {
         padding: 8px 10px;
     }
 
+    .header-left {
+        flex: 1;
+        min-width: 0;
+    }
+
     .header-info h2 {
-        font-size: 13px;
+        font-size: 12px;
+        margin: 0 0 1px;
+    }
+
+    .chat-status {
+        font-size: 11px;
+    }
+
+    .header-actions {
+        gap: 4px;
     }
 
     .icon-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 14px;
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
     }
 
     .messages-container {
-        padding: 8px 12px;
+        padding: 8px 10px;
+    }
+
+    .empty-state {
+        padding: 10px;
+    }
+
+    .empty-icon {
+        font-size: 60px;
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        font-size: 13px;
+        text-align: center;
     }
 
     .message-bubble {
@@ -1077,14 +1238,23 @@ input:focus {
         padding: 6px 10px;
     }
 
+    .message {
+        margin-bottom: 5px;
+    }
+
+    .message-time {
+        font-size: 10px;
+    }
+
     .input-area {
-        padding: 8px 10px 14px;
+        padding: 8px 10px 12px;
         gap: 4px;
     }
 
     #messageInput {
         padding: 8px 10px;
         font-size: 13px;
+        border-radius: 16px;
     }
 
     .btn-send,
@@ -1095,54 +1265,88 @@ input:focus {
     }
 
     .modal-content {
-        padding: 16px;
-        max-width: 90%;
+        padding: 12px;
+        max-width: 95%;
+        border-radius: 10px;
     }
 
     .modal-header h2 {
-        font-size: 16px;
+        font-size: 14px;
     }
 
     .settings-section h3 {
-        font-size: 12px;
+        font-size: 11px;
+        margin-bottom: 8px;
+    }
+
+    .settings-section input {
+        margin-bottom: 8px;
+        padding: 8px 10px;
+        font-size: 13px;
     }
 
     .btn-primary {
-        padding: 12px;
-        font-size: 16px;
+        padding: 10px;
+        font-size: 14px;
     }
 
-    .login-card {
-        width: 95%;
-        max-width: 320px;
-        padding: 30px 20px;
+    .language-buttons {
+        gap: 6px;
     }
 
-    h2 {
-        font-size: 28px;
+    .lang-btn {
+        padding: 8px;
+        font-size: 12px;
     }
 
     .incoming-call-content {
-        padding: 24px 16px;
+        padding: 20px 16px;
+        border-radius: 10px;
     }
 
     .incoming-avatar {
-        font-size: 60px;
+        font-size: 50px;
+        margin-bottom: 12px;
+    }
+
+    .incoming-call-content h2 {
+        font-size: 14px;
+    }
+
+    .incoming-call-content p {
+        font-size: 12px;
+    }
+
+    .incoming-controls {
+        gap: 8px;
+    }
+
+    .btn-accept,
+    .btn-decline {
+        padding: 8px 16px;
+        font-size: 12px;
     }
 
     .call-content {
-        padding: 12px;
+        padding: 10px;
+        border-radius: 10px;
     }
 
     #callVideoArea {
-        height: 240px;
-        border-radius: 8px;
+        height: 220px;
+        border-radius: 10px;
+        margin-bottom: 12px;
     }
 
     #localVideo {
         width: 70px;
         height: 70px;
         border-radius: 6px;
+    }
+
+    .call-header {
+        font-size: 14px;
+        margin-bottom: 12px;
     }
 
     .control-btn {
@@ -1153,5 +1357,19 @@ input:focus {
 
     .call-controls {
         gap: 8px;
+    }
+
+    .friend-request-item {
+        padding: 5px 8px !important;
+    }
+
+    .friend-request-actions {
+        gap: 4px;
+    }
+
+    .btn-accept-friend,
+    .btn-decline-friend {
+        padding: 3px 8px;
+        font-size: 10px;
     }
 }

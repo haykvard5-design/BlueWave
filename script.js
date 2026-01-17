@@ -30,17 +30,34 @@ const translations = {
         settings: 'Настройки',
         language: 'Язык',
         info: 'Информация',
-        aboutText: 'BlueWave v1.0 - Современный мессенджер с видеозвонками',
+        changeId: 'Изменить ID',
+        newId: 'Новый ID',
+        confirmChangeId: 'Изменить',
+        idChanged: 'ID успешно изменен!',
         login: 'ВОЙТИ',
         register: 'ЗАРЕГИСТРИРОВАТЬСЯ',
         haveAccount: 'Уже есть аккаунт? Войти',
         noAccount: 'Нет аккаунта? Зарегистрироваться',
         loginWelcome: 'Добро пожаловать в будущее общения',
         registerWelcome: 'Создайте новый аккаунт',
-        changeId: 'Изменить ID',
-        newId: 'Новый ID',
-        confirmChangeId: 'Изменить',
-        idChanged: 'ID успешно изменен!'
+        aboutText: 'BlueWave v1.0 - Современный мессенджер с видеозвонками и отправкой картинок',
+        messageInputPlaceholder: 'Напишите сообщение...',
+        searchPlaceholder: '🔍 Поиск по ID...',
+        contacts: 'Контакты',
+        groups: 'Группы',
+        blueWaveGroup: 'BlueWave Group',
+        selectChatMessage: 'Выберите контакт для начала общения',
+        noNewIdProvided: 'Введите новый ID',
+        sameIdAsCurrently: 'Это ваш текущий ID',
+        contactAdded: 'Контакт добавлен!',
+        enterContactId: 'Введите ID',
+        alreadyAdded: 'Контакт уже добавлен',
+        thisIsYourId: 'Это ваш ID',
+        selectContactForCall: 'Выберите контакт',
+        callError: 'Ошибка при инициировании звонка: ',
+        fillAllFields: 'Заполните все поля',
+        callEnded: 'Звонок завершен',
+        callDeclined: 'Звонок отклонен'
     },
     en: {
         welcomeText: 'Welcome to the future of communication',
@@ -56,17 +73,34 @@ const translations = {
         settings: 'Settings',
         language: 'Language',
         info: 'Information',
-        aboutText: 'BlueWave v1.0 - Modern messenger with video calls',
+        changeId: 'Change ID',
+        newId: 'New ID',
+        confirmChangeId: 'Change',
+        idChanged: 'ID successfully changed!',
         login: 'LOGIN',
         register: 'REGISTER',
         haveAccount: 'Have account? Login',
         noAccount: 'No account? Register',
         loginWelcome: 'Welcome to the future of communication',
         registerWelcome: 'Create a new account',
-        changeId: 'Change ID',
-        newId: 'New ID',
-        confirmChangeId: 'Change',
-        idChanged: 'ID successfully changed!'
+        aboutText: 'BlueWave v1.0 - Modern messenger with video calls and photo sharing',
+        messageInputPlaceholder: 'Write a message...',
+        searchPlaceholder: '🔍 Search by ID...',
+        contacts: 'Contacts',
+        groups: 'Groups',
+        blueWaveGroup: 'BlueWave Group',
+        selectChatMessage: 'Select a contact to start chatting',
+        noNewIdProvided: 'Enter a new ID',
+        sameIdAsCurrently: 'This is your current ID',
+        contactAdded: 'Contact added!',
+        enterContactId: 'Enter ID',
+        alreadyAdded: 'Contact already added',
+        thisIsYourId: 'This is your ID',
+        selectContactForCall: 'Select a contact',
+        callError: 'Error initiating call: ',
+        fillAllFields: 'Fill in all fields',
+        callEnded: 'Call ended',
+        callDeclined: 'Call declined'
     }
 };
 
@@ -136,7 +170,7 @@ function handleAuthSubmit() {
     const pass = document.getElementById('password').value.trim();
     
     if (!user || !pass) {
-        alert('Заполните все поля');
+        alert(t('fillAllFields'));
         return;
     }
 
@@ -152,13 +186,115 @@ function initializeLanguage() {
             langBtns.forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             currentLanguage = this.dataset.lang;
-            updateLanguage();
+            updateAllLanguageText();
         });
     });
 }
 
-function updateLanguage() {
-    updateAuthScreen();
+// ОБНОВЛЕНИЕ ВСЕГО ТЕКСТА ИНТЕРФЕЙСА ПРИ СМЕНЕ ЯЗЫКА
+function updateAllLanguageText() {
+    // Заголовок экрана входа
+    const welcomeText = document.getElementById('welcomeText');
+    if (welcomeText) {
+        if (isRegisterMode) {
+            welcomeText.textContent = t('registerWelcome');
+        } else {
+            welcomeText.textContent = t('loginWelcome');
+        }
+    }
+
+    // Кнопка входа/регистрации
+    const loginBtn = document.getElementById('loginBtn');
+    if (loginBtn) {
+        loginBtn.textContent = isRegisterMode ? t('register') : t('login');
+    }
+
+    // Кнопка переключения
+    const toggleBtn = document.getElementById('toggleAuthBtn');
+    if (toggleBtn) {
+        toggleBtn.textContent = isRegisterMode ? t('haveAccount') : t('noAccount');
+    }
+
+    // Поле поиска
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.placeholder = t('searchPlaceholder');
+    }
+
+    // Поле ввода сообщения
+    const messageInput = document.getElementById('messageInput');
+    if (messageInput) {
+        messageInput.placeholder = t('messageInputPlaceholder');
+    }
+
+    // Заголовки секций
+    const contactsTitle = document.querySelector('.contacts-section .section-title');
+    if (contactsTitle) {
+        contactsTitle.textContent = t('contacts');
+    }
+
+    const groupsTitle = document.querySelector('.groups-section .section-title');
+    if (groupsTitle) {
+        groupsTitle.textContent = t('groups');
+    }
+
+    // Название группы
+    const globalGroupBtn = document.getElementById('globalGroupBtn');
+    if (globalGroupBtn) {
+        const span = globalGroupBtn.querySelector('span');
+        if (span) {
+            span.textContent = t('blueWaveGroup');
+        }
+    }
+
+    // Заголовок чата
+    const chatTitle = document.getElementById('chatTitle');
+    if (chatTitle && chatTitle.textContent === 'Выберите чат') {
+        chatTitle.textContent = t('selectChat');
+    }
+
+    // Пустое состояние
+    const emptyState = document.querySelector('.empty-state p');
+    if (emptyState) {
+        emptyState.textContent = t('selectChatMessage');
+    }
+
+    // Обновляем кнопки в модалке настроек
+    const addContactBtn = document.getElementById('addContactBtn');
+    if (addContactBtn) {
+        addContactBtn.textContent = t('addContactBtn');
+    }
+
+    const changeIdBtn = document.getElementById('changeIdBtn');
+    if (changeIdBtn) {
+        changeIdBtn.textContent = t('confirmChangeId');
+    }
+
+    // Обновляем плейсхолдеры в настройках
+    const addContactId = document.getElementById('addContactId');
+    if (addContactId) {
+        addContactId.placeholder = t('addContactId');
+    }
+
+    const newIdInput = document.getElementById('newIdInput');
+    if (newIdInput) {
+        newIdInput.placeholder = t('newId');
+    }
+
+    // Обновляем заголовки в модалке
+    const settingsModalHeader = document.querySelector('#settingsModal .modal-header h2');
+    if (settingsModalHeader) {
+        settingsModalHeader.textContent = t('settings');
+    }
+
+    // Обновляем текст информации
+    const infoSection = document.querySelector('.settings-section:last-child');
+    if (infoSection) {
+        const paragraphs = infoSection.querySelectorAll('p');
+        if (paragraphs.length > 0) {
+            paragraphs[1].textContent = t('aboutText');
+        }
+    }
 }
 
 function initializeChat() {
@@ -198,12 +334,12 @@ function initializeChat() {
             const newId = document.getElementById('newIdInput').value.trim().toUpperCase();
             
             if (!newId) {
-                alert('Введите новый ID');
+                alert(t('noNewIdProvided'));
                 return;
             }
             
             if (newId === myShortId) {
-                alert('Это ваш текущий ID');
+                alert(t('sameIdAsCurrently'));
                 return;
             }
             
@@ -222,24 +358,24 @@ function initializeChat() {
             const id = document.getElementById('addContactId').value.trim().toUpperCase();
             
             if (!id) {
-                alert('Введите ID');
+                alert(t('enterContactId'));
                 return;
             }
             
             if (id === myShortId) {
-                alert('Это ваш ID');
+                alert(t('thisIsYourId'));
                 return;
             }
             
             if (addedContacts.includes(id)) {
-                alert('Контакт уже добавлен');
+                alert(t('alreadyAdded'));
                 return;
             }
             
             addedContacts.push(id);
             document.getElementById('addContactId').value = '';
             socket.emit('refresh-users');
-            alert(`Контакт ${id} добавлен!`);
+            alert(`${t('contactAdded')}`);
         };
     }
 
@@ -337,7 +473,7 @@ function initializeChat() {
                 el.classList.remove('active');
             });
             globalGroupBtn.classList.add('active');
-            openChat('global', 'BlueWave Group', 'group');
+            openChat('global', t('blueWaveGroup'), 'group');
         };
     }
 
@@ -526,7 +662,7 @@ function openChat(id, name, type, shortId) {
     currentChat = { id, type, shortId };
     
     document.getElementById('chatTitle').textContent = name;
-    document.getElementById('chatStatus').textContent = 'Online';
+    document.getElementById('chatStatus').textContent = t('online');
     document.getElementById('messagesContainer').innerHTML = '';
     document.getElementById('messageInput').focus();
 }
@@ -614,7 +750,7 @@ const STUN_SERVERS = [
 
 async function initiateCall(isVideo) {
     if (!currentChat) {
-        alert('Выберите контакт или группу');
+        alert(t('selectContactForCall'));
         return;
     }
 
@@ -661,7 +797,7 @@ async function initiateCall(isVideo) {
 
     } catch (err) {
         console.error('Ошибка звонка:', err);
-        alert('Ошибка при инициировании звонка: ' + err.message);
+        alert(t('callError') + err.message);
     }
 }
 
@@ -673,10 +809,8 @@ async function toggleScreenShare() {
 
     try {
         if (isScreenSharing) {
-            // Выключаем показ экрана
             screenStream.getTracks().forEach(track => track.stop());
             
-            // Возвращаемся к камере
             const videoTrack = localStream.getVideoTracks()[0];
             const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
             if (sender) {
@@ -686,7 +820,6 @@ async function toggleScreenShare() {
             isScreenSharing = false;
             document.getElementById('toggleScreenBtn').style.opacity = '1';
         } else {
-            // Включаем показ экрана
             screenStream = await navigator.mediaDevices.getDisplayMedia({ 
                 video: { cursor: 'always' },
                 audio: false 
@@ -701,7 +834,6 @@ async function toggleScreenShare() {
             isScreenSharing = true;
             document.getElementById('toggleScreenBtn').style.opacity = '0.5';
             
-            // Если пользователь остановил показ экрана в меню
             screenTrack.onended = async () => {
                 const videoTrack = localStream.getVideoTracks()[0];
                 if (videoTrack) {
@@ -805,10 +937,10 @@ socket.on('ice-candidate', async (data) => {
 // ЗАВЕРШЕНИЕ ЗВОНКА
 socket.on('call-ended', () => {
     endCall();
-    alert('Звонок завершен');
+    alert(t('callEnded'));
 });
 
 socket.on('call-declined', () => {
     endCall();
-    alert('Звонок отклонен');
+    alert(t('callDeclined'));
 });

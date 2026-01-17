@@ -2,36 +2,47 @@ const express = require('express');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-
-let users = {}; // Тут храним подключенных людей
+const fs = require('fs');
 
 app.use(express.static(__dirname));
 
+let onlineUsers = {};
+
 io.on('connection', (socket) => {
-    // При входе или регистрации сохраняем имя
     socket.on('login', (data) => {
-        users[socket.id] = data.user;
-        io.emit('update-users', Object.entries(users).map(([id, name]) => ({id, name})));
+        let db = JSON.parse(fs.readFileSync('database.json'));
+        if (db.users[data.user] === data.pass) {
+            const shortId = data.user.substring(0, 3) + Math.floor(100 + Math.random() * 900);
+            onlineUsers[socket.id] = { name: data.user, shortId: shortId };
+            socket.emit('auth-success', { shortId });
+            updateUserList();
+        } else {
+            socket.emit('auth-error', 'Ошибка входа');
+        }
     });
 
     socket.on('register', (data) => {
-        users[socket.id] = data.user;
-        io.emit('update-users', Object.entries(users).map(([id, name]) => ({id, name})));
+        let db = JSON.parse(fs.readFileSync('database.json'));
+        if (db.users[data.user]) return socket.emit('auth-error', 'Уже есть такой');
+        db.users[data.user] = data.pass;
+        fs.writeFileSync('database.json', JSON.stringify(db, null, 2));
+        socket.emit('auth-error', 'Регистрация успешна! Теперь войдите.');
     });
 
-    // Отправка ЛС
-    socket.on('private-message', (data) => {
-        io.to(data.to).emit('receive-private-message', {
-            from: socket.id,
-            senderName: users[socket.id],
-            text: data.text
-        });
+    socket.on('private-msg', d => {
+        socket.to(d.to).emit('receive-msg', { name: onlineUsers[socket.id].name, text: d.text, from: socket.id });
     });
 
-    socket.on('disconnect', () => {
-        delete users[socket.id];
-        io.emit('update-users', Object.entries(users).map(([id, name]) => ({id, name})));
+    socket.on('group-msg', d => {
+        io.emit('receive-msg', { name: onlineUsers[socket.id].name, text: d.text, from: socket.id });
     });
+
+    function updateUserList() {
+        const users = Object.entries(onlineUsers).map(([id, info]) => ({ socketId: id, name: info.name, shortId: info.shortId }));
+        io.emit('update-users', users);
+    }
+
+    socket.on('disconnect', () => { delete onlineUsers[socket.id]; updateUserList(); });
 });
 
-http.listen(process.env.PORT || 3000, () => console.log('Server running...'));
+http.listen(process.env.PORT || 3000);

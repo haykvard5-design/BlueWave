@@ -10,16 +10,16 @@
     <div id="auth">
         <div class="login-card">
             <div class="blue-icon-box">
-                <img src="logo.png" alt="Ship">
+                <img src="logo.png" alt="Logo">
             </div>
             <h1 class="brand-name">BlueWave</h1>
-            <p class="welcome-text">Добро пожаловать в мессенджер</p>
+            <p id="auth-status" class="welcome-text">Добро пожаловать в мессенджер</p>
             <div class="auth-fields">
                 <input type="text" id="username" placeholder="Логин (например, admin)">
                 <input type="password" id="password" placeholder="Пароль (например, 1234)">
                 <button id="main-btn" class="btn-primary">ВОЙТИ</button>
             </div>
-            <p class="toggle-mode">Зарегистрироваться</p>
+            <p class="toggle-mode" id="toggle-auth">Зарегистрироваться</p>
         </div>
     </div>
 
@@ -27,8 +27,8 @@
         <div class="app-container">
             <div class="sidebar">
                 <div class="sidebar-header">
-                    <div style="display: flex; justify-content: space-between;">
-                        <h3 style="color: #0056b3;">BlueWave</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 style="color: #0056b3;">BlueWave</h2>
                         <div id="settings-btn" style="cursor: pointer;">⚙️</div>
                     </div>
                     <div id="my-id-display">Ваш ID: ...</div>
@@ -44,7 +44,7 @@
             </div>
             <div class="chat-main">
                 <div class="chat-header"><span id="target-user-name">Выберите чат</span></div>
-                <div id="messages"><div id="chat-welcome">Выберите чат для общения</div></div>
+                <div id="messages"><div id="chat-welcome">Выберите чат для начала общения</div></div>
                 <div class="message-input-area" id="input-panel" style="display: none;">
                     <input type="text" id="msg-input" placeholder="Введите сообщение...">
                     <button id="send-btn">Отправить</button>
@@ -55,10 +55,10 @@
 
     <div id="settings-modal" class="modal">
         <div class="modal-content">
-            <h4>Добавить по ID</h4>
-            <input type="text" id="add-user-id" placeholder="Введите 6 символов">
+            <h3>Добавить контакт</h3>
+            <input type="text" id="add-user-id" placeholder="Введите 6 символов ID">
             <button id="confirm-add-btn" class="btn-primary">ДОБАВИТЬ</button>
-            <p id="close-settings" style="margin-top: 10px; cursor: pointer; color: gray;">Закрыть</p>
+            <p id="close-settings" style="margin-top: 15px; cursor: pointer; color: gray;">Закрыть</p>
         </div>
     </div>
 

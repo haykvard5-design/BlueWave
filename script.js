@@ -27,7 +27,13 @@ const translations = {
         settings: 'Настройки',
         language: 'Язык',
         info: 'Информация',
-        aboutText: 'BlueWave v1.0 - Современный мессенджер с видеозвонками'
+        aboutText: 'BlueWave v1.0 - Современный мессенджер с видеозвонками',
+        login: 'ВОЙТИ',
+        register: 'ЗАРЕГИСТРИРОВАТЬСЯ',
+        haveAccount: 'Уже есть аккаунт? Войти',
+        noAccount: 'Нет аккаунта? Зарегистрироваться',
+        loginWelcome: 'Добро пожаловать в будущее общения',
+        registerWelcome: 'Создайте новый аккаунт'
     },
     en: {
         welcomeText: 'Welcome to the future of communication',
@@ -43,7 +49,13 @@ const translations = {
         settings: 'Settings',
         language: 'Language',
         info: 'Information',
-        aboutText: 'BlueWave v1.0 - Modern messenger with video calls'
+        aboutText: 'BlueWave v1.0 - Modern messenger with video calls',
+        login: 'LOGIN',
+        register: 'REGISTER',
+        haveAccount: 'Have account? Login',
+        noAccount: 'No account? Register',
+        loginWelcome: 'Welcome to the future of communication',
+        registerWelcome: 'Create a new account'
     }
 };
 
@@ -51,7 +63,31 @@ function t(key) {
     return translations[currentLanguage][key] || key;
 }
 
-// ЭКРАН ВХОДА
+// ========== ЭКРАН ВХОДА ==========
+
+// Переключение между входом и регистрацией
+document.getElementById('toggleAuthBtn').onclick = () => {
+    isRegisterMode = !isRegisterMode;
+    updateAuthScreen();
+};
+
+function updateAuthScreen() {
+    const loginBtn = document.getElementById('loginBtn');
+    const toggleBtn = document.getElementById('toggleAuthBtn');
+    const welcomeText = document.getElementById('welcomeText');
+
+    if (isRegisterMode) {
+        loginBtn.textContent = t('register');
+        toggleBtn.textContent = t('haveAccount');
+        welcomeText.textContent = t('registerWelcome');
+    } else {
+        loginBtn.textContent = t('login');
+        toggleBtn.textContent = t('noAccount');
+        welcomeText.textContent = t('loginWelcome');
+    }
+}
+
+// Логин / Регистрация
 document.getElementById('loginBtn').onclick = () => {
     const user = document.getElementById('username').value.trim();
     const pass = document.getElementById('password').value.trim();
@@ -61,8 +97,8 @@ document.getElementById('loginBtn').onclick = () => {
         return;
     }
 
-    // Пытаемся сначала залогиниться
-    socket.emit('login', { user, pass });
+    const action = isRegisterMode ? 'register' : 'login';
+    socket.emit(action, { user, pass });
 };
 
 // СМЕНА ЯЗЫКА
@@ -76,8 +112,7 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
 });
 
 function updateLanguage() {
-    document.getElementById('welcomeText').textContent = t('welcomeText');
-    document.getElementById('chatTitle').textContent = t('selectChat');
+    updateAuthScreen();
 }
 
 // ОБРАБОТКА ЛОГИНА
@@ -88,6 +123,8 @@ socket.on('auth-success', (data) => {
     document.getElementById('chat-container').style.display = 'flex';
     document.getElementById('userIdDisplay').textContent = `ID: ${myShortId}`;
     document.getElementById('userNameDisplay').textContent = myName;
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
 });
 
 socket.on('auth-error', (msg) => {
@@ -96,6 +133,10 @@ socket.on('auth-error', (msg) => {
 
 socket.on('auth-success-register', (msg) => {
     alert(msg);
+    isRegisterMode = false;
+    updateAuthScreen();
+    document.getElementById('username').value = '';
+    document.getElementById('password').value = '';
 });
 
 // ОБНОВЛЕНИЕ СПИСКА КОНТАКТОВ
@@ -127,7 +168,9 @@ function openChat(id, name, type, shortId) {
     document.querySelectorAll('.contact-item, .group-item').forEach(el => {
         el.classList.remove('active');
     });
-    event?.target?.closest('.contact-item, .group-item')?.classList.add('active');
+    if (event?.target?.closest('.contact-item, .group-item')) {
+        event.target.closest('.contact-item, .group-item').classList.add('active');
+    }
     
     document.getElementById('chatTitle').textContent = name;
     document.getElementById('chatStatus').textContent = t('online');
@@ -420,4 +463,3 @@ socket.on('call-ended', () => {
 socket.on('call-declined', () => {
     endCall();
     alert('Звонок отклонен');
-});

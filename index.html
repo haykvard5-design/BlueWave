@@ -2,67 +2,62 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlueWave Messenger</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ВОЗВРАЩАЕМ ДИЗАЙН ИЗ ПЕРВОГО СКРИНШОТА */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body, html { width: 100%; height: 100%; background: #007bff; display: flex; justify-content: center; align-items: center; overflow: hidden; }
+
+        /* КАРТОЧКА ВХОДА */
+        .login-card { background: white; width: 320px; padding: 40px 30px; border-radius: 30px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .blue-icon-box { width: 80px; height: 80px; background: #007bff; border-radius: 20px; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; }
+        .blue-icon-box img { width: 50px; filter: brightness(0) invert(1); } /* Логотип станет белым */
+        
+        .brand-name { color: #0056b3; font-size: 26px; font-weight: bold; margin-bottom: 5px; }
+        .welcome-text { color: #888; font-size: 13px; margin-bottom: 25px; }
+
+        .auth-fields input { width: 100%; padding: 12px 15px; margin-bottom: 15px; border: 1px solid #eef0f2; border-radius: 12px; background: #f9fbff; outline: none; }
+        .btn-primary { width: 100%; background: #007bff; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+
+        /* ИНТЕРФЕЙС ЧАТА (ФИКС ОШИБОК) */
+        #chat { width: 100%; height: 100%; background: white; position: absolute; top: 0; left: 0; display: none; }
+        .app-container { display: flex; height: 100%; }
+        .sidebar { width: 280px; border-right: 1px solid #eee; background: #fff; z-index: 10; }
+        .chat-main { flex: 1; display: flex; flex-direction: column; background: #f9f9f9; }
+
+        /* МОДАЛКА (ИСПРАВЛЕНО, БОЛЬШЕ НЕ УЕЗЖАЕТ) */
+        .modal { 
+            display: none; position: fixed; z-index: 999; 
+            left: 0; top: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; 
+        }
+        .modal-content { background: white; padding: 30px; border-radius: 25px; width: 300px; text-align: center; }
+    </style>
 </head>
 <body>
     <div id="auth">
         <div class="login-card">
-            <div class="blue-icon-box">
-                <img src="logo.png" alt="Logo">
-            </div>
+            <div class="blue-icon-box"><img src="logo.png"></div>
             <h1 class="brand-name">BlueWave</h1>
             <p class="welcome-text">Добро пожаловать в мессенджер</p>
             <div class="auth-fields">
-                <input type="text" id="username" placeholder="Логин (например, admin)">
-                <input type="password" id="password" placeholder="Пароль (например, 1234)">
+                <input type="text" id="username" placeholder="Логин">
+                <input type="password" id="password" placeholder="Пароль">
                 <button id="main-btn" class="btn-primary">ВОЙТИ</button>
             </div>
-            <p class="toggle-mode">Зарегистрироваться</p>
         </div>
     </div>
 
-    <div id="chat" style="display: none;">
-        <div class="app-container">
-            <div class="sidebar">
-                <div class="sidebar-header">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h2 style="color: #0056b3;">BlueWave</h2>
-                        <div id="settings-btn" style="cursor: pointer; font-size: 18px;">⚙️</div>
-                    </div>
-                    <div id="my-id-display">ID: загрузка...</div>
-                    <input type="text" id="search-input" placeholder="Поиск по ID...">
-                </div>
-                <div class="section-title">Группы</div>
-                <div class="user-item" id="global-group">
-                    <div class="mini-cube" style="background: #00c853;"></div> 
-                    <span>BlueWave Group</span>
-                </div>
-                <div class="section-title">Контакты</div>
-                <div id="user-list"></div>
-            </div>
-            <div class="chat-main">
-                <div class="chat-header"><span id="target-user-name">Выберите чат</span></div>
-                <div id="messages"><div id="chat-welcome">Начните общение прямо сейчас</div></div>
-                <div class="message-input-area" id="input-panel" style="display: none;">
-                    <input type="text" id="msg-input" placeholder="Введите сообщение...">
-                    <button id="send-btn">Отправить</button>
-                </div>
-            </div>
+    <div id="chat">
         </div>
-    </div>
 
     <div id="settings-modal" class="modal">
         <div class="modal-content">
             <h3>Добавить по ID</h3>
-            <input type="text" id="add-user-id" placeholder="Введите 6 символов ID">
+            <input type="text" id="add-user-id" placeholder="ID (6 символов)">
             <button id="confirm-add-btn" class="btn-primary">ДОБАВИТЬ</button>
-            <p id="close-settings" style="margin-top: 15px; cursor: pointer; color: gray;">Закрыть</p>
+            <p onclick="document.getElementById('settings-modal').style.display='none'" style="cursor:pointer; margin-top:10px; color:gray;">Закрыть</p>
         </div>
     </div>
-
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="script.js"></script>
 </body>
 </html>

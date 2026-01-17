@@ -3,7 +3,6 @@ const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const fs = require('fs');
-const path = require('path');
 const bcrypt = require('bcrypt');
 
 app.use(express.static(__dirname));
@@ -12,7 +11,6 @@ let onlineUsers = {};
 const DB_FILE = 'database.json';
 const SALT_ROUNDS = 10;
 
-// Функция для безопасного чтения БД
 function readDB() {
     try {
         if (!fs.existsSync(DB_FILE)) {
@@ -22,49 +20,44 @@ function readDB() {
         }
         return JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
     } catch (err) {
-        console.error('Ошибка чтения БД:', err);
+        console.error('DB read error:', err);
         return { users: {}, messages: [] };
     }
 }
 
-// Функция для безопасного сохранения БД
 function writeDB(data) {
     try {
         fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8');
         return true;
     } catch (err) {
-        console.error('Ошибка записи БД:', err);
+        console.error('DB write error:', err);
         return false;
     }
 }
 
-// Генерируем уникальный ID для пользователя
 function generateShortId(username) {
-    // Использует имя пользователя + случайные цифры
     return username.substring(0, 3).toUpperCase() + Math.floor(100 + Math.random() * 900);
 }
 
-// Валидация username и password
 function validateInput(user, pass) {
     if (typeof user !== 'string' || typeof pass !== 'string') {
-        return { valid: false, error: 'Некорректные данные' };
+        return { valid: false, error: 'Invalid data' };
     }
     if (user.length < 3 || user.length > 20) {
-        return { valid: false, error: 'Логин: от 3 до 20 символов' };
+        return { valid: false, error: 'Username: 3-20 characters' };
     }
     if (pass.length < 4 || pass.length > 50) {
-        return { valid: false, error: 'Пароль: от 4 до 50 символов' };
+        return { valid: false, error: 'Password: 4-50 characters' };
     }
     if (!/^[a-zA-Z0-9_]+$/.test(user)) {
-        return { valid: false, error: 'Логин может содержать только буквы, цифры и _' };
+        return { valid: false, error: 'Username: letters, numbers, _ only' };
     }
     return { valid: true };
 }
 
 io.on('connection', (socket) => {
-    console.log('Пользователь подключен:', socket.id);
+    console.log('User connected:', socket.id);
 
-    // ЛОГИН
     socket.on('login', async (data) => {
         try {
             const validation = validateInput(data.user, data.pass);
@@ -75,17 +68,15 @@ io.on('connection', (socket) => {
             const db = readDB();
             
             if (!db.users[data.user]) {
-                return socket.emit('auth-error', 'Пользователь не найден');
+                return socket.emit('auth-error', 'User not found');
             }
 
-            // Сравниваем хэшированный пароль
             const isPasswordValid = await bcrypt.compare(data.pass, db.users[data.user].hash);
             
             if (!isPasswordValid) {
-                return socket.emit('auth-error', 'Неверный пароль');
+                return socket.emit('auth-error', 'Wrong password');
             }
 
-            // Получаем сохраненный ID или создаем новый
             let shortId = db.users[data.user].shortId;
             if (!shortId) {
                 shortId = generateShortId(data.user);
@@ -99,17 +90,18 @@ io.on('connection', (socket) => {
                 loginTime: new Date()
             };
 
-            socket.emit('auth-success', { shortId });
+            socket.emit('auth-success', { 
+                shortId,
+                userName: data.user
+            });
             updateUserList();
-            console.log(`${data.user} успешно вошел с ID: ${shortId}`);
 
         } catch (err) {
-            console.error('Ошибка логина:', err);
-            socket.emit('auth-error', 'Ошибка сервера');
+            console.error('Login error:', err);
+            socket.emit('auth-error', 'Server error');
         }
     });
 
-    // РЕГИСТРАЦИЯ
     socket.on('register', async (data) => {
         try {
             const validation = validateInput(data.user, data.pass);
@@ -120,10 +112,9 @@ io.on('connection', (socket) => {
             const db = readDB();
             
             if (db.users[data.user]) {
-                return socket.emit('auth-error', 'Пользователь уже существует');
+                return socket.emit('auth-error', 'User already exists');
             }
 
-            // Генерируем ID при регистрации и хэшируем пароль
             const shortId = generateShortId(data.user);
             const hash = await bcrypt.hash(data.pass, SALT_ROUNDS);
             db.users[data.user] = { 
@@ -133,24 +124,19 @@ io.on('connection', (socket) => {
             };
             
             if (writeDB(db)) {
-                socket.emit('auth-success-register', 'Регистрация успешна! Теперь войдите.');
-                console.log(`Новый пользователь: ${data.user} с ID: ${shortId}`);
-            } else {
-                socket.emit('auth-error', 'Ошибка при сохранении');
+                socket.emit('auth-success-register', 'Registration successful! Login now.');
+                console.log(`New user: ${data.user} with ID: ${shortId}`);
             }
 
         } catch (err) {
-            console.error('Ошибка регистрации:', err);
-            socket.emit('auth-error', 'Ошибка сервера');
+            console.error('Register error:', err);
+            socket.emit('auth-error', 'Server error');
         }
     });
 
-    // ПРИВАТНОЕ СООБЩЕНИЕ
     socket.on('private-msg', (d) => {
         try {
-            if (!d.to || !d.text || typeof d.text !== 'string') {
-                return socket.emit('msg-error', 'Некорректные данные сообщения');
-            }
+            if (!d.to || !d.text || typeof d.text !== 'string') return;
 
             const text = d.text.trim().substring(0, 500);
             if (!text) return;
@@ -175,21 +161,18 @@ io.on('connection', (socket) => {
                 name: sender.name,
                 text: text,
                 from: socket.id,
-                timestamp: message.timestamp
+                timestamp: message.timestamp,
+                type: 'private'
             });
 
         } catch (err) {
-            console.error('Ошибка отправки приватного сообщения:', err);
-            socket.emit('msg-error', 'Ошибка отправки');
+            console.error('Private msg error:', err);
         }
     });
 
-    // ГРУППОВОЕ СООБЩЕНИЕ
     socket.on('group-msg', (d) => {
         try {
-            if (!d.text || typeof d.text !== 'string') {
-                return socket.emit('msg-error', 'Некорректные данные сообщения');
-            }
+            if (!d.text || typeof d.text !== 'string') return;
 
             const text = d.text.trim().substring(0, 500);
             if (!text) return;
@@ -213,16 +196,52 @@ io.on('connection', (socket) => {
                 name: sender.name,
                 text: text,
                 from: socket.id,
-                timestamp: message.timestamp
+                timestamp: message.timestamp,
+                type: 'group'
             });
 
         } catch (err) {
-            console.error('Ошибка отправки группового сообщения:', err);
-            socket.emit('msg-error', 'Ошибка отправки');
+            console.error('Group msg error:', err);
         }
     });
 
-    // ОБНОВЛЕНИЕ СПИСКА ПОЛЬЗОВАТЕЛЕЙ
+    // ЗВОНКИ
+    socket.on('audio-call', (data) => {
+        socket.to(data.to).emit('incoming-audio-call', {
+            from: onlineUsers[socket.id].name,
+            offer: data.offer,
+            isVideo: false
+        });
+    });
+
+    socket.on('video-call', (data) => {
+        socket.to(data.to).emit('incoming-video-call', {
+            from: onlineUsers[socket.id].name,
+            offer: data.offer,
+            isVideo: true
+        });
+    });
+
+    socket.on('answer-call', (data) => {
+        socket.to(data.to).emit('call-answered', {
+            answer: data.answer
+        });
+    });
+
+    socket.on('ice-candidate', (data) => {
+        socket.to(data.to).emit('ice-candidate', {
+            candidate: data.candidate
+        });
+    });
+
+    socket.on('end-call', (data) => {
+        socket.to(data.to).emit('call-ended');
+    });
+
+    socket.on('decline-call', (data) => {
+        socket.to(data.to).emit('call-declined');
+    });
+
     socket.on('refresh-users', () => {
         updateUserList();
     });
@@ -237,23 +256,17 @@ io.on('connection', (socket) => {
         io.emit('update-users', users);
     }
 
-    // ОТКЛЮЧЕНИЕ
     socket.on('disconnect', () => {
         const user = onlineUsers[socket.id];
         if (user) {
-            console.log(`${user.name} отключился`);
+            console.log(`${user.name} disconnected`);
             delete onlineUsers[socket.id];
             updateUserList();
         }
-    });
-
-    // ОБРАБОТКА ОШИБОК
-    socket.on('error', (err) => {
-        console.error('Socket ошибка:', err);
     });
 });
 
 const PORT = process.env.PORT || 3000;
 http.listen(PORT, () => {
-    console.log(`Сервер запущен на порту ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });

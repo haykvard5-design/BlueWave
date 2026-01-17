@@ -1,20 +1,156 @@
-<div class="login-card" id="auth-screen">
-    <div class="logo-box">
-        <img src="logo.png" alt="BlueWave Logo">
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlueWave Messenger</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ЭКРАН ВХОДА -->
+    <div class="login-card" id="auth-screen">
+        <div class="logo-box">
+            <img src="logo.png" alt="BlueWave Logo">
+        </div>
+        <h2>BlueWave</h2>
+        <p class="welcome-text" id="welcomeText">Добро пожаловать в будущее общения</p>
+        
+        <input type="text" id="username" placeholder="Имя пользователя">
+        <input type="password" id="password" placeholder="Пароль">
+        
+        <button class="btn-primary" id="loginBtn">Войти / Регистрация</button>
     </div>
-    <h2>BlueWave</h2>
-    <p class="welcome-text">Добро пожаловать в будущее общения</p>
-    
-    <input type="text" id="username" placeholder="Имя пользователя">
-    <input type="password" id="password" placeholder="Пароль">
-    
-    <button class="btn-primary" id="loginBtn">Войти / Регистрация</button>
-</div>
 
-<div id="chat" style="display: none;">
-    <div id="messages"></div>
-    <div class="input-area">
-        <input type="text" id="messageInput" placeholder="Напишите сообщение...">
-        <button class="btn-primary" style="width: auto;">Отправить</button>
+    <!-- ОСНОВНОЙ ИНТЕРФЕЙС ЧАТА -->
+    <div id="chat-container" style="display: none;">
+        <div class="chat-wrapper">
+            <!-- БОКОВАЯ ПАНЕЛЬ -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-top">
+                        <h1 class="brand">BlueWave</h1>
+                        <button class="settings-btn" id="settingsBtn">⚙️</button>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-id" id="userIdDisplay">ID: Loading...</div>
+                        <div class="user-name" id="userNameDisplay">User</div>
+                    </div>
+                    <input type="text" id="searchInput" placeholder="🔍 Поиск...">
+                </div>
+
+                <div class="contacts-section">
+                    <h3 class="section-title">Контакты</h3>
+                    <div id="contactsList" class="contacts-list"></div>
+                </div>
+
+                <div class="groups-section">
+                    <h3 class="section-title">Группы</h3>
+                    <div class="group-item" id="globalGroupBtn">
+                        <div class="group-avatar">👥</div>
+                        <span>BlueWave Group</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ОСНОВНОЕ ОКНО ЧАТА -->
+            <main class="chat-main">
+                <!-- ЗАГОЛОВОК ЧАТА -->
+                <div class="chat-header">
+                    <div class="header-left">
+                        <div class="chat-avatar" id="chatAvatar">👤</div>
+                        <div class="header-info">
+                            <h2 id="chatTitle">Выберите чат</h2>
+                            <span id="chatStatus" class="chat-status">Не подключено</span>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button class="icon-btn" id="callBtn" title="Звонок">📞</button>
+                        <button class="icon-btn" id="videoCallBtn" title="Видео звонок">📹</button>
+                    </div>
+                </div>
+
+                <!-- ОБЛАСТЬ СООБЩЕНИЙ -->
+                <div class="messages-container" id="messagesContainer">
+                    <div class="empty-state">
+                        <div class="empty-icon">💬</div>
+                        <p>Выберите контакт для начала общения</p>
+                    </div>
+                </div>
+
+                <!-- ВВОД СООБЩЕНИЯ -->
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="Напишите сообщение...">
+                    <button class="btn-send" id="sendBtn">➤</button>
+                </div>
+            </main>
+        </div>
     </div>
-</div>
+
+    <!-- МОДАЛКА НАСТРОЕК -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Настройки</h2>
+                <button class="close-btn" id="closeSettingsBtn">✕</button>
+            </div>
+            
+            <div class="settings-section">
+                <h3>Язык</h3>
+                <div class="language-buttons">
+                    <button class="lang-btn active" data-lang="ru">🇷🇺 Русский</button>
+                    <button class="lang-btn" data-lang="en">🇬🇧 English</button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3>Добавить контакт</h3>
+                <input type="text" id="addContactId" placeholder="ID контакта (например: ARN923)">
+                <button class="btn-primary" id="addContactBtn">Добавить</button>
+            </div>
+
+            <div class="settings-section">
+                <h3>Информация</h3>
+                <p>BlueWave v1.0</p>
+                <p>Современный мессенджер с видеозвонками</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ЗВОНКА -->
+    <div id="callModal" class="modal call-modal">
+        <div class="call-content">
+            <div class="call-header">
+                <span id="callTitle">Входящий звонок от User</span>
+            </div>
+
+            <div class="call-video-area" id="callVideoArea">
+                <video id="remoteVideo" autoplay playsinline></video>
+                <video id="localVideo" autoplay playsinline muted></video>
+            </div>
+
+            <div class="call-controls">
+                <button class="control-btn mic-btn" id="toggleMicBtn" title="Микрофон">🎤</button>
+                <button class="control-btn camera-btn" id="toggleCameraBtn" title="Камера">📹</button>
+                <button class="control-btn end-call-btn" id="endCallBtn">Завершить</button>
+                <button class="control-btn answer-btn" id="answerCallBtn">Ответить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- МОДАЛКА ВХОДЯЩЕГО ЗВОНКА -->
+    <div id="incomingCallModal" class="modal">
+        <div class="incoming-call-content">
+            <div class="incoming-avatar">☎️</div>
+            <h2 id="incomingCallName">User</h2>
+            <p>Входящий звонок...</p>
+            <div class="incoming-controls">
+                <button class="btn-accept" id="acceptBtn">Ответить</button>
+                <button class="btn-decline" id="declineBtn">Отклонить</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@
 body {
     margin: 0;
     background-color: #007bff;
-    font-family: 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -137,33 +137,34 @@ input:focus {
     background: #fff;
 }
 
-/* ========== БОКОВАЯ ПАНЕЛЬ ========== */
+/* ========== БОКОВАЯ ПАНЕЛЬ (Как в TG) ========== */
 .sidebar {
-    width: 300px;
-    background: linear-gradient(180deg, #f8f9fa, #fff);
-    border-right: 1px solid #e0e0e0;
+    width: 320px;
+    background: white;
+    border-right: 1px solid #e5e5e5;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: none;
 }
 
 .sidebar-header {
-    padding: 20px;
-    border-bottom: 1px solid #e0e0e0;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .sidebar-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
 }
 
 .brand {
-    color: #007bff;
-    font-size: 24px;
+    color: #000;
+    font-size: 26px;
     margin: 0;
-    font-weight: 700;
+    font-weight: 800;
+    letter-spacing: -0.5px;
 }
 
 .settings-btn {
@@ -172,24 +173,32 @@ input:focus {
     font-size: 20px;
     cursor: pointer;
     transition: transform 0.2s;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .settings-btn:hover {
+    background: #f0f0f0;
     transform: rotate(20deg);
 }
 
 .user-info {
-    background: linear-gradient(135deg, #007bff, #0062cc);
-    color: white;
-    padding: 12px;
-    border-radius: 12px;
-    margin-bottom: 15px;
+    background: #f0f2f5;
+    color: #000;
+    padding: 12px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+    display: none;
 }
 
 .user-id {
     font-size: 12px;
-    opacity: 0.9;
-    margin-bottom: 5px;
+    opacity: 0.7;
+    margin-bottom: 4px;
 }
 
 .user-name {
@@ -199,34 +208,34 @@ input:focus {
 
 #searchInput {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #e0e0e0;
+    padding: 10px 16px;
+    border: none;
     border-radius: 20px;
     font-size: 14px;
-    background: #f0f0f0;
+    background: #f0f2f5;
     outline: none;
     transition: all 0.2s;
 }
 
 #searchInput:focus {
-    background: white;
-    border-color: #007bff;
+    background: #e4e6eb;
 }
 
 .contacts-section,
 .groups-section {
     flex: 1;
     overflow-y: auto;
-    padding: 15px 0;
+    padding: 8px 0;
 }
 
 .section-title {
-    font-size: 12px;
-    color: #999;
+    font-size: 13px;
+    color: #65676b;
     text-transform: uppercase;
-    padding: 10px 20px 5px;
+    padding: 8px 20px 4px;
     margin: 0;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 .contacts-list {
@@ -235,31 +244,34 @@ input:focus {
 }
 
 .contact-item,
-.group-item {
+.group-item,
+.friend-request-item {
     display: flex;
     align-items: center;
-    padding: 12px 20px;
+    padding: 8px 12px;
     cursor: pointer;
-    transition: all 0.2s;
-    border-left: 3px solid transparent;
+    transition: background 0.15s;
+    border-left: none;
+    margin: 0 8px;
+    border-radius: 12px;
 }
 
 .contact-item:hover,
-.group-item:hover {
-    background: #f0f0f0;
-    border-left-color: #007bff;
+.group-item:hover,
+.friend-request-item:hover {
+    background: #f0f2f5;
 }
 
 .contact-item.active,
-.group-item.active {
-    background: #e3f2fd;
-    border-left-color: #007bff;
+.group-item.active,
+.friend-request-item.active {
+    background: #e7f3ff;
 }
 
 .contact-avatar,
 .group-avatar {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: linear-gradient(135deg, #007bff, #0062cc);
     display: flex;
@@ -273,20 +285,30 @@ input:focus {
 .contact-item .contact-info {
     flex: 1;
     overflow: hidden;
+    min-width: 0;
 }
 
 .contact-name {
     font-weight: 600;
-    font-size: 14px;
-    color: #333;
+    font-size: 15px;
+    color: #000;
 }
 
 .contact-status {
-    font-size: 12px;
-    color: #999;
+    font-size: 13px;
+    color: #65676b;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.friend-request-badge {
+    background: #e7f3ff;
+    color: #007bff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
 }
 
 /* ========== ОСНОВНОЕ ОКНО ЧАТА ========== */
@@ -298,13 +320,13 @@ input:focus {
 }
 
 .chat-header {
-    padding: 20px;
-    background: linear-gradient(180deg, #fff, #f8f9fa);
-    border-bottom: 1px solid #e0e0e0;
+    padding: 12px 20px;
+    background: white;
+    border-bottom: 1px solid #e5e5e5;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    box-shadow: none;
 }
 
 .header-left {
@@ -314,42 +336,43 @@ input:focus {
 }
 
 .chat-avatar {
-    width: 50px;
-    height: 50px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     background: linear-gradient(135deg, #007bff, #0062cc);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
-    margin-right: 15px;
+    font-size: 22px;
+    margin-right: 12px;
     flex-shrink: 0;
 }
 
 .header-info h2 {
-    margin: 0 0 5px;
-    color: #333;
-    font-size: 18px;
+    margin: 0 0 2px;
+    color: #000;
+    font-size: 15px;
+    font-weight: 600;
 }
 
 .chat-status {
     font-size: 12px;
-    color: #999;
+    color: #65676b;
 }
 
 .header-actions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
 .icon-btn {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    border: 1px solid #e0e0e0;
-    background: white;
+    border: none;
+    background: #f0f2f5;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
@@ -357,19 +380,17 @@ input:focus {
 }
 
 .icon-btn:hover {
-    background: #007bff;
-    color: white;
-    border-color: #007bff;
+    background: #e4e6eb;
 }
 
-/* ========== ОБЛАСТЬ СООБЩЕНИЙ ========== */
+/* ========== ОБЛАСТЬ СООБЩЕНИЙ (Как в TG) ========== */
 .messages-container {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 12px 20px;
     display: flex;
     flex-direction: column;
-    background: #fafafa;
+    background: white;
 }
 
 .empty-state {
@@ -389,7 +410,7 @@ input:focus {
 
 .message {
     display: flex;
-    margin-bottom: 15px;
+    margin-bottom: 8px;
     animation: messageIn 0.3s ease;
 }
 
@@ -409,61 +430,60 @@ input:focus {
 }
 
 .message-bubble {
-    max-width: 60%;
-    padding: 12px 16px;
+    max-width: 55%;
+    padding: 8px 12px;
     border-radius: 18px;
     word-wrap: break-word;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.4;
 }
 
 .message.own .message-bubble {
-    background: linear-gradient(135deg, #007bff, #0062cc);
-    color: white;
+    background: #e7f3ff;
+    color: #000;
     border-bottom-right-radius: 4px;
 }
 
 .message.other .message-bubble {
-    background: #e0e0e0;
-    color: #333;
+    background: #f0f0f0;
+    color: #000;
     border-bottom-left-radius: 4px;
 }
 
 .message-bubble img {
     max-width: 100%;
-    border-radius: 10px;
-    margin-top: 5px;
+    border-radius: 12px;
+    margin-top: 4px;
     cursor: pointer;
 }
 
 .message-time {
-    font-size: 11px;
+    font-size: 12px;
     color: #999;
-    margin-top: 5px;
+    margin-top: 4px;
     display: block;
 }
 
 .message.own .message-time {
     text-align: right;
-    color: rgba(255,255,255,0.7);
 }
 
 /* ========== ВВОД СООБЩЕНИЯ ========== */
 .input-area {
-    padding: 15px 20px;
+    padding: 12px 20px 20px;
     background: white;
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #e5e5e5;
     display: flex;
-    gap: 10px;
-    align-items: center;
+    gap: 8px;
+    align-items: flex-end;
 }
 
 .btn-image {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #4CAF50, #45a049);
-    color: white;
+    background: #f0f2f5;
+    color: #007bff;
     border: none;
     cursor: pointer;
     font-size: 18px;
@@ -475,39 +495,34 @@ input:focus {
 }
 
 .btn-image:hover {
-    transform: scale(1.05);
-}
-
-.btn-image:active {
-    transform: scale(0.95);
+    background: #e4e6eb;
 }
 
 #messageInput {
     flex: 1;
-    padding: 12px 15px;
-    border: 1px solid #e0e0e0;
+    padding: 10px 16px;
+    border: 1px solid #e5e5e5;
     border-radius: 20px;
-    font-size: 14px;
+    font-size: 15px;
     outline: none;
-    background: #f5f5f5;
+    background: #f0f2f5;
     transition: all 0.2s;
 }
 
 #messageInput:focus {
     border-color: #007bff;
     background: white;
-    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
 }
 
 .btn-send {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #2196F3, #1976D2);
+    background: #007bff;
     color: white;
     border: none;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 16px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
@@ -516,14 +531,10 @@ input:focus {
 }
 
 .btn-send:hover {
-    transform: scale(1.05);
+    background: #0056b3;
 }
 
-.btn-send:active {
-    transform: scale(0.95);
-}
-
-/* ========== МОДАЛКИ ========== */
+/* ========== МОДАЛКИ (Как в TG) ========== */
 .modal {
     display: none;
     position: fixed;
@@ -553,13 +564,13 @@ input:focus {
 
 .modal-content {
     background: white;
-    padding: 30px;
-    border-radius: 20px;
+    padding: 24px;
+    border-radius: 12px;
     width: 90%;
-    max-width: 400px;
+    max-width: 360px;
     max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 40px rgba(0,0,0,0.16);
     animation: slideUp 0.3s ease;
 }
 
@@ -572,7 +583,9 @@ input:focus {
 
 .modal-header h2 {
     margin: 0;
-    color: #333;
+    color: #000;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .close-btn {
@@ -580,12 +593,19 @@ input:focus {
     border: none;
     font-size: 24px;
     cursor: pointer;
-    color: #999;
+    color: #65676b;
     transition: color 0.2s;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
 }
 
 .close-btn:hover {
-    color: #333;
+    background: #f0f2f5;
+    color: #000;
 }
 
 .settings-section {
@@ -593,21 +613,23 @@ input:focus {
 }
 
 .settings-section h3 {
-    color: #333;
-    font-size: 14px;
-    margin: 0 0 10px;
+    color: #000;
+    font-size: 13px;
+    margin: 0 0 12px;
     text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 .language-buttons {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
 .lang-btn {
     flex: 1;
     padding: 10px;
-    border: 2px solid #e0e0e0;
+    border: 1px solid #e5e5e5;
     background: white;
     border-radius: 8px;
     cursor: pointer;
@@ -617,7 +639,7 @@ input:focus {
 }
 
 .lang-btn:hover {
-    border-color: #007bff;
+    background: #f0f2f5;
 }
 
 .lang-btn.active {
@@ -628,17 +650,68 @@ input:focus {
 
 .settings-section input {
     margin-bottom: 10px;
+    padding: 10px 12px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 100%;
 }
 
 .settings-section p {
     margin: 5px 0;
     font-size: 14px;
-    color: #666;
+    color: #65676b;
 }
 
 #addContactBtn,
 #changeIdBtn {
     width: 100%;
+}
+
+/* ========== ЗАПРОСЫ В ДРУЗЬЯ ========== */
+.friend-requests-section {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.friend-request-item {
+    position: relative;
+    padding: 8px 12px !important;
+}
+
+.friend-request-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.btn-accept-friend,
+.btn-decline-friend {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-accept-friend {
+    background: #007bff;
+    color: white;
+}
+
+.btn-accept-friend:hover {
+    background: #0056b3;
+}
+
+.btn-decline-friend {
+    background: #f0f2f5;
+    color: #000;
+}
+
+.btn-decline-friend:hover {
+    background: #e4e6eb;
 }
 
 /* ========== ЗВОНКИ ========== */
@@ -648,10 +721,10 @@ input:focus {
 
 .call-content {
     background: #1a1a1a;
-    border-radius: 20px;
+    border-radius: 12px;
     width: 90%;
     max-width: 800px;
-    padding: 20px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -659,18 +732,18 @@ input:focus {
 
 .call-header {
     color: white;
-    font-size: 18px;
-    margin-bottom: 20px;
+    font-size: 16px;
+    margin-bottom: 16px;
 }
 
 #callVideoArea {
     width: 100%;
     height: 500px;
     background: #000;
-    border-radius: 16px;
+    border-radius: 12px;
     position: relative;
     overflow: hidden;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 #remoteVideo {
@@ -681,30 +754,30 @@ input:focus {
 
 #localVideo {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
-    width: 150px;
-    height: 150px;
+    bottom: 8px;
+    right: 8px;
+    width: 120px;
+    height: 120px;
     background: #333;
-    border-radius: 12px;
+    border-radius: 8px;
     object-fit: cover;
     border: 2px solid white;
 }
 
 .call-controls {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     justify-content: center;
     flex-wrap: wrap;
 }
 
 .control-btn {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     border: none;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 18px;
     transition: all 0.2s;
     display: flex;
     align-items: center;
@@ -737,10 +810,6 @@ input:focus {
     background: #f57c00;
 }
 
-.screen-btn.off {
-    background: #d32f2f;
-}
-
 .end-call-btn {
     background: #d32f2f;
     color: white;
@@ -762,63 +831,65 @@ input:focus {
 /* ========== ВХОДЯЩИЙ ЗВОНОК ========== */
 .incoming-call-content {
     background: white;
-    border-radius: 20px;
-    padding: 40px;
+    border-radius: 12px;
+    padding: 32px 24px;
     text-align: center;
-    max-width: 400px;
+    max-width: 360px;
     animation: slideUp 0.3s ease;
 }
 
 .incoming-avatar {
-    font-size: 80px;
-    margin-bottom: 20px;
+    font-size: 72px;
+    margin-bottom: 16px;
 }
 
 .incoming-call-content h2 {
-    margin: 10px 0;
-    color: #333;
+    margin: 8px 0;
+    color: #000;
+    font-size: 16px;
+    font-weight: 600;
 }
 
 .incoming-call-content p {
-    color: #999;
-    margin-bottom: 30px;
+    color: #65676b;
+    margin-bottom: 24px;
+    font-size: 14px;
 }
 
 .incoming-controls {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     justify-content: center;
 }
 
 .btn-accept,
 .btn-decline {
-    padding: 12px 30px;
+    padding: 10px 24px;
     border: none;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
     flex: 1;
+    font-size: 14px;
 }
 
 .btn-accept {
-    background: #4caf50;
+    background: #007bff;
     color: white;
 }
 
 .btn-accept:hover {
-    background: #45a049;
-    transform: translateY(-2px);
+    background: #0056b3;
 }
 
 .btn-decline {
-    background: #d32f2f;
-    color: white;
+    background: #f0f2f5;
+    color: #000;
 }
 
 .btn-decline:hover {
-    background: #c62828;
-    transform: translateY(-2px);
+    background: #e4e6eb;
 }
 
 /* ========== СКРОЛЛБАР ========== */
@@ -839,68 +910,248 @@ input:focus {
     background: #999;
 }
 
-/* ========== АДАПТИВНОСТЬ ========== */
-@media (max-width: 768px) {
+/* ========== МОБИЛЬНАЯ АДАПТИВНОСТЬ ========== */
+@media (max-width: 900px) {
     .sidebar {
-        width: 250px;
+        width: 280px;
     }
 
     .message-bubble {
-        max-width: 80%;
-    }
-
-    .call-content {
-        padding: 15px;
-    }
-
-    #callVideoArea {
-        height: 300px;
-    }
-
-    #localVideo {
-        width: 100px;
-        height: 100px;
-    }
-
-    .call-controls {
-        gap: 10px;
-    }
-
-    .control-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 18px;
+        max-width: 70%;
     }
 }
 
-@media (max-width: 600px) {
-    .sidebar {
-        width: 200px;
-    }
-
-    .brand {
-        font-size: 20px;
-    }
-
-    .login-card {
-        width: 90%;
-        max-width: 350px;
-    }
-
-    .modal-content {
-        width: 95%;
-    }
-
+@media (max-width: 768px) {
     .chat-wrapper {
         flex-direction: column;
     }
 
     .sidebar {
         width: 100%;
-        height: 30vh;
+        height: auto;
+        max-height: 35vh;
+        border-right: none;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    .sidebar-header {
+        padding: 12px 16px;
+    }
+
+    .brand {
+        font-size: 22px;
+    }
+
+    .contacts-section,
+    .groups-section {
+        max-height: 150px;
+    }
+
+    .chat-main {
+        height: 65vh;
+    }
+
+    .message-bubble {
+        max-width: 85%;
+        font-size: 14px;
+        padding: 7px 11px;
+    }
+
+    .message {
+        margin-bottom: 6px;
+    }
+
+    .message-time {
+        font-size: 11px;
+    }
+
+    .input-area {
+        padding: 10px 12px 16px;
+        gap: 6px;
+    }
+
+    #messageInput {
+        padding: 9px 12px;
+        font-size: 14px;
+    }
+
+    .btn-send,
+    .btn-image {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .chat-header {
+        padding: 10px 12px;
+    }
+
+    .header-info h2 {
+        font-size: 14px;
+    }
+
+    .chat-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    #callVideoArea {
+        height: 280px;
+    }
+
+    #localVideo {
+        width: 80px;
+        height: 80px;
+    }
+
+    .control-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        max-height: 30vh;
+    }
+
+    .contacts-section,
+    .groups-section {
+        max-height: 100px;
+    }
+
+    .sidebar-header {
+        padding: 10px 12px;
+    }
+
+    .brand {
+        font-size: 20px;
+    }
+
+    .section-title {
+        font-size: 11px;
+        padding: 6px 12px 2px;
+    }
+
+    .contact-item,
+    .group-item {
+        padding: 6px 8px;
+        margin: 0 4px;
+    }
+
+    .contact-avatar,
+    .group-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+        margin-right: 10px;
     }
 
     .chat-main {
         height: 70vh;
+    }
+
+    .chat-header {
+        padding: 8px 10px;
+    }
+
+    .header-info h2 {
+        font-size: 13px;
+    }
+
+    .icon-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+
+    .messages-container {
+        padding: 8px 12px;
+    }
+
+    .message-bubble {
+        max-width: 90%;
+        font-size: 13px;
+        padding: 6px 10px;
+    }
+
+    .input-area {
+        padding: 8px 10px 14px;
+        gap: 4px;
+    }
+
+    #messageInput {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+
+    .btn-send,
+    .btn-image {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+
+    .modal-content {
+        padding: 16px;
+        max-width: 90%;
+    }
+
+    .modal-header h2 {
+        font-size: 16px;
+    }
+
+    .settings-section h3 {
+        font-size: 12px;
+    }
+
+    .btn-primary {
+        padding: 12px;
+        font-size: 16px;
+    }
+
+    .login-card {
+        width: 95%;
+        max-width: 320px;
+        padding: 30px 20px;
+    }
+
+    h2 {
+        font-size: 28px;
+    }
+
+    .incoming-call-content {
+        padding: 24px 16px;
+    }
+
+    .incoming-avatar {
+        font-size: 60px;
+    }
+
+    .call-content {
+        padding: 12px;
+    }
+
+    #callVideoArea {
+        height: 240px;
+        border-radius: 8px;
+    }
+
+    #localVideo {
+        width: 70px;
+        height: 70px;
+        border-radius: 6px;
+    }
+
+    .control-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+
+    .call-controls {
+        gap: 8px;
     }
 }

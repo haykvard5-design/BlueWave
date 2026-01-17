@@ -13,6 +13,7 @@ let peerConnection = null;
 let incomingCall = null;
 let allUsers = [];
 let isScreenSharing = false;
+let friendRequests = [];
 
 // ПЕРЕВОДЫ
 const translations = {
@@ -22,9 +23,9 @@ const translations = {
         selectChatHint: 'Выберите контакт для начала общения',
         online: 'Online',
         offline: 'Offline',
-        addContact: 'Добавить контакт',
+        addContact: 'Отправить запрос в друзья',
         addContactId: 'ID контакта (например: ARN923)',
-        addContactBtn: 'Добавить',
+        addContactBtn: 'Отправить',
         incoming: 'Входящий звонок от',
         callEnded: 'Звонок завершен',
         settings: 'Настройки',
@@ -45,6 +46,7 @@ const translations = {
         searchPlaceholder: '🔍 Поиск по ID...',
         contacts: 'Контакты',
         groups: 'Группы',
+        friendRequests: 'Запросы в друзья',
         blueWaveGroup: 'BlueWave Group',
         selectChatMessage: 'Выберите контакт для начала общения',
         noNewIdProvided: 'Введите новый ID',
@@ -57,7 +59,10 @@ const translations = {
         callError: 'Ошибка при инициировании звонка: ',
         fillAllFields: 'Заполните все поля',
         callEnded: 'Звонок завершен',
-        callDeclined: 'Звонок отклонен'
+        callDeclined: 'Звонок отклонен',
+        friendRequestSent: 'Запрос в друзья отправлен!',
+        friendRequestReceived: 'Новый запрос в друзья!',
+        friendAdded: 'Контакт добавлен!'
     },
     en: {
         welcomeText: 'Welcome to the future of communication',
@@ -65,9 +70,9 @@ const translations = {
         selectChatHint: 'Select a contact to start chatting',
         online: 'Online',
         offline: 'Offline',
-        addContact: 'Add contact',
+        addContact: 'Send friend request',
         addContactId: 'Contact ID (e.g., ARN923)',
-        addContactBtn: 'Add',
+        addContactBtn: 'Send',
         incoming: 'Incoming call from',
         callEnded: 'Call ended',
         settings: 'Settings',
@@ -88,6 +93,7 @@ const translations = {
         searchPlaceholder: '🔍 Search by ID...',
         contacts: 'Contacts',
         groups: 'Groups',
+        friendRequests: 'Friend Requests',
         blueWaveGroup: 'BlueWave Group',
         selectChatMessage: 'Select a contact to start chatting',
         noNewIdProvided: 'Enter a new ID',
@@ -100,7 +106,10 @@ const translations = {
         callError: 'Error initiating call: ',
         fillAllFields: 'Fill in all fields',
         callEnded: 'Call ended',
-        callDeclined: 'Call declined'
+        callDeclined: 'Call declined',
+        friendRequestSent: 'Friend request sent!',
+        friendRequestReceived: 'New friend request!',
+        friendAdded: 'Contact added!'
     }
 };
 
@@ -193,7 +202,6 @@ function initializeLanguage() {
 
 // ОБНОВЛЕНИЕ ВСЕГО ТЕКСТА ИНТЕРФЕЙСА ПРИ СМЕНЕ ЯЗЫКА
 function updateAllLanguageText() {
-    // Заголовок экрана входа
     const welcomeText = document.getElementById('welcomeText');
     if (welcomeText) {
         if (isRegisterMode) {
@@ -203,31 +211,26 @@ function updateAllLanguageText() {
         }
     }
 
-    // Кнопка входа/регистрации
     const loginBtn = document.getElementById('loginBtn');
     if (loginBtn) {
         loginBtn.textContent = isRegisterMode ? t('register') : t('login');
     }
 
-    // Кнопка переключения
     const toggleBtn = document.getElementById('toggleAuthBtn');
     if (toggleBtn) {
         toggleBtn.textContent = isRegisterMode ? t('haveAccount') : t('noAccount');
     }
 
-    // Поле поиска
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
         searchInput.placeholder = t('searchPlaceholder');
     }
 
-    // Поле ввода сообщения
     const messageInput = document.getElementById('messageInput');
     if (messageInput) {
         messageInput.placeholder = t('messageInputPlaceholder');
     }
 
-    // Заголовки секций
     const contactsTitle = document.querySelector('.contacts-section .section-title');
     if (contactsTitle) {
         contactsTitle.textContent = t('contacts');
@@ -238,7 +241,11 @@ function updateAllLanguageText() {
         groupsTitle.textContent = t('groups');
     }
 
-    // Название группы
+    const friendRequestsTitle = document.querySelector('.friend-requests-section .section-title');
+    if (friendRequestsTitle) {
+        friendRequestsTitle.textContent = t('friendRequests');
+    }
+
     const globalGroupBtn = document.getElementById('globalGroupBtn');
     if (globalGroupBtn) {
         const span = globalGroupBtn.querySelector('span');
@@ -247,19 +254,16 @@ function updateAllLanguageText() {
         }
     }
 
-    // Заголовок чата
     const chatTitle = document.getElementById('chatTitle');
     if (chatTitle && chatTitle.textContent === 'Выберите чат') {
         chatTitle.textContent = t('selectChat');
     }
 
-    // Пустое состояние
     const emptyState = document.querySelector('.empty-state p');
     if (emptyState) {
         emptyState.textContent = t('selectChatMessage');
     }
 
-    // Обновляем кнопки в модалке настроек
     const addContactBtn = document.getElementById('addContactBtn');
     if (addContactBtn) {
         addContactBtn.textContent = t('addContactBtn');
@@ -270,7 +274,6 @@ function updateAllLanguageText() {
         changeIdBtn.textContent = t('confirmChangeId');
     }
 
-    // Обновляем плейсхолдеры в настройках
     const addContactId = document.getElementById('addContactId');
     if (addContactId) {
         addContactId.placeholder = t('addContactId');
@@ -281,13 +284,11 @@ function updateAllLanguageText() {
         newIdInput.placeholder = t('newId');
     }
 
-    // Обновляем заголовки в модалке
     const settingsModalHeader = document.querySelector('#settingsModal .modal-header h2');
     if (settingsModalHeader) {
         settingsModalHeader.textContent = t('settings');
     }
 
-    // Обновляем текст информации
     const infoSection = document.querySelector('.settings-section:last-child');
     if (infoSection) {
         const paragraphs = infoSection.querySelectorAll('p');
@@ -351,7 +352,7 @@ function initializeChat() {
         };
     }
 
-    // ДОБАВЛЕНИЕ КОНТАКТА
+    // ДОБАВЛЕНИЕ КОНТАКТА (Отправить запрос в друзья)
     const addContactBtn = document.getElementById('addContactBtn');
     if (addContactBtn) {
         addContactBtn.onclick = () => {
@@ -372,10 +373,15 @@ function initializeChat() {
                 return;
             }
             
-            addedContacts.push(id);
+            // Отправляем запрос в друзья
+            socket.emit('send-friend-request', { 
+                toId: id, 
+                fromId: myShortId,
+                fromName: myName 
+            });
+            
             document.getElementById('addContactId').value = '';
-            socket.emit('refresh-users');
-            alert(`${t('contactAdded')}`);
+            alert(t('friendRequestSent'));
         };
     }
 
@@ -404,7 +410,12 @@ function initializeChat() {
                         `;
                         div.onclick = () => {
                             if (!addedContacts.includes(user.shortId)) {
-                                addedContacts.push(user.shortId);
+                                socket.emit('send-friend-request', { 
+                                    toId: user.shortId, 
+                                    fromId: myShortId,
+                                    fromName: myName 
+                                });
+                                alert(t('friendRequestSent'));
                             }
                             searchInput.value = '';
                             socket.emit('refresh-users');
@@ -631,7 +642,13 @@ socket.on('update-users', (users) => {
     const searchInput = document.getElementById('searchInput');
     
     if (!searchInput || searchInput.value.trim() === '') {
+        // Удаляем старые контакты, но сохраняем запросы
+        const friendRequestsSection = contactsList.querySelector('.friend-requests-section');
         contactsList.innerHTML = '';
+        
+        if (friendRequestsSection) {
+            contactsList.appendChild(friendRequestsSection);
+        }
         
         users.forEach(user => {
             if (addedContacts.includes(user.shortId) && user.shortId !== myShortId) {
@@ -733,7 +750,7 @@ function renderImage(imageData, side, name = 'User') {
     div.innerHTML = `
         <div class="message-bubble">
             ${side === 'other' ? `<strong>${name}</strong><br>` : ''}
-            <img src="${imageData}" style="max-width: 300px; border-radius: 10px; margin-top: 5px;">
+            <img src="${imageData}" style="max-width: 100%; border-radius: 8px; margin-top: 4px;">
             <span class="message-time">${time}</span>
         </div>
     `;
@@ -741,6 +758,66 @@ function renderImage(imageData, side, name = 'User') {
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
 }
+
+// ========== ЗАПРОСЫ В ДРУЗЬЯ ==========
+socket.on('receive-friend-request', (data) => {
+    friendRequests.push({
+        fromId: data.fromId,
+        fromName: data.fromName
+    });
+
+    const contactsList = document.getElementById('contactsList');
+    
+    let friendRequestsSection = contactsList.querySelector('.friend-requests-section');
+    if (!friendRequestsSection) {
+        friendRequestsSection = document.createElement('div');
+        friendRequestsSection.className = 'friend-requests-section';
+        friendRequestsSection.innerHTML = `<div class="section-title">${t('friendRequests')}</div>`;
+        contactsList.insertBefore(friendRequestsSection, contactsList.firstChild);
+    }
+
+    const div = document.createElement('div');
+    div.className = 'friend-request-item';
+    div.innerHTML = `
+        <div class="contact-avatar">👤</div>
+        <div class="contact-info">
+            <div class="contact-name">${data.fromName}</div>
+            <div class="contact-status">${data.fromId}</div>
+        </div>
+        <div class="friend-request-actions">
+            <button class="btn-accept-friend">✓</button>
+            <button class="btn-decline-friend">✕</button>
+        </div>
+    `;
+
+    const acceptBtn = div.querySelector('.btn-accept-friend');
+    const declineBtn = div.querySelector('.btn-decline-friend');
+
+    acceptBtn.onclick = (e) => {
+        e.stopPropagation();
+        addedContacts.push(data.fromId);
+        socket.emit('accept-friend-request', { toId: data.fromId });
+        div.remove();
+        alert(t('friendAdded'));
+        socket.emit('refresh-users');
+    };
+
+    declineBtn.onclick = (e) => {
+        e.stopPropagation();
+        socket.emit('decline-friend-request', { toId: data.fromId });
+        div.remove();
+        friendRequests = friendRequests.filter(r => r.fromId !== data.fromId);
+    };
+
+    friendRequestsSection.appendChild(div);
+});
+
+socket.on('friend-request-accepted', (data) => {
+    if (!addedContacts.includes(data.fromId)) {
+        addedContacts.push(data.fromId);
+    }
+    socket.emit('refresh-users');
+});
 
 // ========== ЗВОНКИ ==========
 const STUN_SERVERS = [

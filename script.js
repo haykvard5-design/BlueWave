@@ -1,10 +1,8 @@
 const socket = io();
-let myShortId = '';
-let selectedUserId = null;
-let currentChatType = 'none';
-let addedUsers = []; // Список ID, которые ты добавил вручную
+let myId = '';
+let addedUsers = [];
 
-// --- АВТОРИЗАЦИЯ (Твой дизайн) ---
+// Вход
 document.getElementById('main-btn').onclick = () => {
     const user = document.getElementById('username').value.trim();
     if (user) {
@@ -14,138 +12,82 @@ document.getElementById('main-btn').onclick = () => {
     }
 };
 
-// Получаем твой ID от сервера при входе
-socket.on('login-success', (data) => {
-    myShortId = data.id;
-    document.getElementById('my-id-display').innerText = "Ваш ID: " + myShortId;
+socket.on('login-success', d => {
+    myId = d.id;
+    document.getElementById('my-id-display').innerText = "Ваш ID: " + myId;
 });
 
-// --- ЛОГИКА НАСТРОЕК (Шестеренка) ---
-const settingsBtn = document.getElementById('settings-btn');
-const modal = document.getElementById('settings-modal');
-const closeBtn = document.getElementById('close-settings');
-const addBtn = document.getElementById('confirm-add-btn');
-
-settingsBtn.onclick = () => modal.style.display = 'flex';
-closeBtn.onclick = () => modal.style.display = 'none';
-
-// Добавление пользователя по ID
-addBtn.onclick = () => {
-    const targetId = document.getElementById('add-user-id').value.trim();
-    // Нельзя добавить самого себя и пустой ID
-    if (targetId && targetId !== myShortId && !addedUsers.includes(targetId)) {
-        addedUsers.push(targetId);
-        socket.emit('refresh-users'); // Запрос к серверу обновить список имен
-        alert("Пользователь " + targetId + " добавлен!");
-    }
-    modal.style.display = 'none';
-    document.getElementById('add-user-id').value = '';
-};
-
-// --- ПОИСК ПО ID ---
-document.getElementById('search-input').oninput = function() {
-    const searchValue = this.value.toLowerCase();
-    const items = document.querySelectorAll('#user-list .user-item');
-    
-    items.forEach(item => {
-        const userId = item.getAttribute('data-id').toLowerCase();
-        if (userId.includes(searchValue)) {
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none';
-        }
-    });
-};
-
-// --- ОБНОВЛЕНИЕ СПИСКА КОНТАКТОВ ---
-socket.on('update-users', (users) => {
-    const userList = document.getElementById('user-list');
-    userList.innerHTML = ''; // Очищаем старый список
-
-    users.forEach(u => {
-        // Показываем человека только если его ID в твоем списке "Добавленных"
-        if (addedUsers.includes(u.shortId)) {
-            const div = document.createElement('div');
-            div.className = 'user-item';
-            div.setAttribute('data-id', u.shortId); // Для поиска
-            div.innerHTML = `
-                <div class="mini-cube"></div> 
-                <span>${u.name} (ID: ${u.shortId})</span>
-            `;
-            div.onclick = () => openChat(u.id, u.name, 'private', div);
-            userList.appendChild(div);
-        }
-    });
-});
-
-// --- ОТКРЫТИЕ ЧАТА ---
-function openChat(id, name, type, element) {
-    selectedUserId = id;
-    currentChatType = type;
-    
-    // Показываем панель ввода
-    document.getElementById('input-panel').style.display = 'flex';
-    document.getElementById('chat-welcome').style.display = 'none';
-    document.getElementById('target-user-name').innerText = name;
-    
-    // Очищаем окно сообщений (или можно загружать историю)
-    document.getElementById('messages').innerHTML = '';
-    
-    // Подсветка активного чата
-    document.querySelectorAll('.user-item').forEach(el => el.classList.remove('active'));
-    if (element) element.classList.add('active');
-}
-
-// Клик по BlueWave Group (Глобальный чат)
+// Группа
 document.getElementById('global-group').onclick = function() {
     openChat('global', 'BlueWave Group', 'group', this);
 };
 
-// --- ОТПРАВКА СООБЩЕНИЙ ---
-document.getElementById('send-btn').onclick = () => {
-    const input = document.getElementById('msg-input');
-    const text = input.value.trim();
-    
-    if (!text) return;
+// Модалка
+document.getElementById('settings-btn').onclick = () => document.getElementById('settings-modal').style.display = 'flex';
+document.getElementById('close-settings').onclick = () => document.getElementById('settings-modal').style.display = 'none';
 
-    if (currentChatType === 'group') {
-        socket.emit('group-message', { text });
-    } else if (currentChatType === 'private') {
-        socket.emit('private-message', { to: selectedUserId, text });
-        appendMsg("Вы", text, "my-msg");
+// Добавление ID
+document.getElementById('confirm-add-btn').onclick = () => {
+    const id = document.getElementById('add-user-id').value.trim();
+    if (id && id !== myId && !addedUsers.includes(id)) {
+        addedUsers.push(id);
+        socket.emit('refresh-users');
     }
-    
-    input.value = '';
+    document.getElementById('settings-modal').style.display = 'none';
 };
 
-// --- ПОЛУЧЕНИЕ СООБЩЕНИЙ ---
-socket.on('receive-private-message', (data) => {
-    if (selectedUserId === data.from) {
-        appendMsg(data.senderName, data.text, "their-msg");
-    }
+// Поиск
+document.getElementById('search-input').oninput = function() {
+    const val = this.value.toLowerCase();
+    document.querySelectorAll('#user-list .user-item').forEach(el => {
+        el.style.display = el.getAttribute('data-id').includes(val) ? 'flex' : 'none';
+    });
+};
+
+socket.on('update-users', users => {
+    const list = document.getElementById('user-list');
+    list.innerHTML = '';
+    users.forEach(u => {
+        if (addedUsers.includes(u.shortId)) {
+            const div = document.createElement('div');
+            div.className = 'user-item';
+            div.setAttribute('data-id', u.shortId);
+            div.innerHTML = `<div class="mini-cube"></div> <span>${u.name} (${u.shortId})</span>`;
+            div.onclick = () => openChat(u.id, u.name, 'private', div);
+            list.appendChild(div);
+        }
+    });
 });
 
-socket.on('receive-group-message', (data) => {
-    if (currentChatType === 'group') {
-        const type = (data.senderId === socket.id) ? "my-msg" : "their-msg";
-        appendMsg(data.senderName, data.text, type);
-    }
-});
+let chat = {};
+function openChat(id, name, type, el) {
+    chat = { id, type };
+    document.getElementById('input-panel').style.display = 'flex';
+    document.getElementById('chat-welcome').style.display = 'none';
+    document.getElementById('target-user-name').innerText = name;
+    document.getElementById('messages').innerHTML = '';
+    document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
+    if(el) el.classList.add('active');
+}
 
-// Функция отрисовки сообщения (Пузырьки)
-function appendMsg(name, text, type) {
-    const msgDiv = document.createElement('div');
-    msgDiv.className = "message-row " + type;
-    
-    // Твой стиль пузырьков
-    msgDiv.innerHTML = `
-        <div class="bubble">
-            <b>${name}</b><br>
-            ${text}
-        </div>
-    `;
-    
-    const container = document.getElementById('messages');
-    container.appendChild(msgDiv);
-    container.scrollTop = container.scrollHeight;
+document.getElementById('send-btn').onclick = () => {
+    const txt = document.getElementById('msg-input').value.trim();
+    if (!txt) return;
+    if (chat.type === 'group') socket.emit('group-message', { text: txt });
+    else {
+        socket.emit('private-message', { to: chat.id, text: txt });
+        renderMsg("Вы", txt, 'my');
+    }
+    document.getElementById('msg-input').value = '';
+};
+
+socket.on('receive-private-message', d => renderMsg(d.senderName, d.text, 'their'));
+socket.on('receive-group-message', d => renderMsg(d.senderName, d.text, d.senderId === socket.id ? 'my' : 'their'));
+
+function renderMsg(n, t, s) {
+    const div = document.createElement('div');
+    div.style.alignSelf = s === 'my' ? 'flex-end' : 'flex-start';
+    div.innerHTML = `<div style="padding:10px; margin:5px; border-radius:15px; background:${s==='my'?'#007bff':'#eee'}; color:${s==='my'?'#fff':'#000'}"><b>${n}</b><br>${t}</div>`;
+    document.getElementById('messages').appendChild(div);
+    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
 }

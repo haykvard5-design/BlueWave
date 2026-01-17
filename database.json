@@ -1,7 +1,15 @@
 {
   "users": {
-    "hayko91234": "haykvard111",
-    "aren": "arenmart2012"
+    "hayko": {
+      "hash": "$2b$10$...", 
+      "shortId": "HAY123",
+      "createdAt": "2026-01-17"
+    },
+    "aren": {
+      "hash": "$2b$10$...",
+      "shortId": "ARE456",
+      "createdAt": "2026-01-17"
+    }
   },
   "messages": []
 }

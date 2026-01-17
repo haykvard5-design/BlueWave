@@ -2,7 +2,7 @@ const socket = io();
 let myId = '';
 let addedUsers = [];
 
-// Вход
+// ВХОД
 document.getElementById('main-btn').onclick = () => {
     const user = document.getElementById('username').value.trim();
     if (user) {
@@ -17,31 +17,31 @@ socket.on('login-success', d => {
     document.getElementById('my-id-display').innerText = "Ваш ID: " + myId;
 });
 
-// Группа
-document.getElementById('global-group').onclick = function() {
-    openChat('global', 'BlueWave Group', 'group', this);
-};
-
-// Модалка
+// МОДАЛКА
 document.getElementById('settings-btn').onclick = () => document.getElementById('settings-modal').style.display = 'flex';
 document.getElementById('close-settings').onclick = () => document.getElementById('settings-modal').style.display = 'none';
 
-// Добавление ID
+// ДОБАВЛЕНИЕ
 document.getElementById('confirm-add-btn').onclick = () => {
-    const id = document.getElementById('add-user-id').value.trim();
-    if (id && id !== myId && !addedUsers.includes(id)) {
-        addedUsers.push(id);
+    const val = document.getElementById('add-user-id').value.trim();
+    if (val && val !== myId && !addedUsers.includes(val)) {
+        addedUsers.push(val);
         socket.emit('refresh-users');
     }
     document.getElementById('settings-modal').style.display = 'none';
 };
 
-// Поиск
+// ПОИСК
 document.getElementById('search-input').oninput = function() {
     const val = this.value.toLowerCase();
     document.querySelectorAll('#user-list .user-item').forEach(el => {
         el.style.display = el.getAttribute('data-id').includes(val) ? 'flex' : 'none';
     });
+};
+
+// ГРУППА
+document.getElementById('global-group').onclick = function() {
+    openChat('global', 'BlueWave Group', 'group', this);
 };
 
 socket.on('update-users', users => {
@@ -59,9 +59,9 @@ socket.on('update-users', users => {
     });
 });
 
-let chat = {};
+let chatInfo = {};
 function openChat(id, name, type, el) {
-    chat = { id, type };
+    chatInfo = { id, type };
     document.getElementById('input-panel').style.display = 'flex';
     document.getElementById('chat-welcome').style.display = 'none';
     document.getElementById('target-user-name').innerText = name;
@@ -71,11 +71,11 @@ function openChat(id, name, type, el) {
 }
 
 document.getElementById('send-btn').onclick = () => {
-    const txt = document.getElementById('msg-input').value.trim();
+    const txt = document.getElementById('msg-input').value;
     if (!txt) return;
-    if (chat.type === 'group') socket.emit('group-message', { text: txt });
+    if (chatInfo.type === 'group') socket.emit('group-message', { text: txt });
     else {
-        socket.emit('private-message', { to: chat.id, text: txt });
+        socket.emit('private-message', { to: chatInfo.id, text: txt });
         renderMsg("Вы", txt, 'my');
     }
     document.getElementById('msg-input').value = '';
@@ -86,8 +86,8 @@ socket.on('receive-group-message', d => renderMsg(d.senderName, d.text, d.sender
 
 function renderMsg(n, t, s) {
     const div = document.createElement('div');
-    div.style.alignSelf = s === 'my' ? 'flex-end' : 'flex-start';
-    div.innerHTML = `<div style="padding:10px; margin:5px; border-radius:15px; background:${s==='my'?'#007bff':'#eee'}; color:${s==='my'?'#fff':'#000'}"><b>${n}</b><br>${t}</div>`;
+    div.style.textAlign = s === 'my' ? 'right' : 'left';
+    div.innerHTML = `<div style="display:inline-block; padding:10px; margin:5px; border-radius:15px; background:${s==='my'?'#007bff':'#eee'}; color:${s==='my'?'#fff':'#000'}"><b>${n}</b><br>${t}</div>`;
     document.getElementById('messages').appendChild(div);
     document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
 }

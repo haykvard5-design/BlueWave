@@ -4,110 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlueWave Messenger</title>
-    <style>
-        /* --- ТВOЙ ДИЗАЙН ИЗ ПЕРВОГО СКРИНШОТА --- */
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-
-        body, html { 
-            width: 100%; height: 100%; 
-            background-color: #007bff; 
-            display: flex; justify-content: center; align-items: center; 
-            overflow: hidden;
-        }
-
-        /* КАРТОЧКА ВХОДА (ОДИН В ОДИН С ФОТО) */
-        #auth { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
-        
-        .login-card { 
-            background: white; 
-            width: 320px; 
-            padding: 40px 30px; 
-            border-radius: 30px; 
-            text-align: center; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-
-        .blue-icon-box { 
-            width: 80px; height: 80px; 
-            background: #007bff; 
-            border-radius: 20px; 
-            margin: 0 auto 20px; 
-            display: flex; justify-content: center; align-items: center;
-        }
-
-        .blue-icon-box img { 
-            width: 50px; 
-            filter: brightness(0) invert(1); /* Делает лого белым */
-        }
-
-        .brand-name { color: #0056b3; font-size: 26px; font-weight: bold; margin-bottom: 5px; }
-        .welcome-text { color: #888; font-size: 13px; margin-bottom: 25px; }
-
-        .auth-fields input { 
-            width: 100%; 
-            padding: 12px 15px; 
-            margin-bottom: 15px;
-            border: 1px solid #eef0f2; 
-            border-radius: 12px; 
-            background: #f9fbff; 
-            outline: none; 
-            font-size: 14px;
-        }
-
-        .btn-primary { 
-            width: 100%; 
-            background: #007bff; 
-            color: white; 
-            border: none; 
-            padding: 15px; 
-            border-radius: 12px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            font-size: 14px;
-        }
-
-        .toggle-mode { margin-top: 15px; font-size: 13px; color: #333; cursor: pointer; text-decoration: underline; }
-
-        /* --- ИНТЕРФЕЙС ЧАТА --- */
-        #chat { width: 100%; height: 100%; background: white; display: none; }
-        .app-container { display: flex; height: 100%; }
-
-        .sidebar { width: 280px; background: #fff; border-right: 1px solid #eee; display: flex; flex-direction: column; }
-        .sidebar-header { padding: 20px; border-bottom: 1px solid #eee; }
-        
-        #my-id-display { font-size: 11px; color: #007bff; font-weight: bold; margin: 8px 0; }
-        #search-input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #eee; outline: none; }
-
-        .section-title { padding: 15px 20px 5px; font-size: 11px; color: #aaa; text-transform: uppercase; font-weight: bold; }
-        
-        .user-item { display: flex; align-items: center; padding: 12px 20px; cursor: pointer; transition: 0.2s; }
-        .user-item:hover, .user-item.active { background: #eef6ff; }
-        .mini-cube { width: 35px; height: 35px; border-radius: 8px; background: #007bff; margin-right: 12px; }
-
-        .chat-main { flex: 1; display: flex; flex-direction: column; background: #f9fbff; }
-        .chat-header { padding: 20px; border-bottom: 1px solid #eee; background: #fff; font-weight: bold; }
-        
-        #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; }
-        
-        .message-input-area { padding: 15px; border-top: 1px solid #eee; background: #fff; display: flex; gap: 10px; }
-        .message-input-area input { flex: 1; padding: 12px 18px; border-radius: 25px; border: 1px solid #eee; outline: none; }
-        
-        /* МОДАЛЬНОЕ ОКНО */
-        .modal { 
-            display: none; position: fixed; z-index: 1000; 
-            left: 0; top: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.5); justify-content: center; align-items: center; 
-        }
-        .modal-content { background: white; padding: 30px; border-radius: 25px; width: 300px; text-align: center; }
-        .modal-content input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 10px; border: 1px solid #eee; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div id="auth">
         <div class="login-card">
             <div class="blue-icon-box">
-                <img src="logo.png" alt="Logo">
+                <img src="logo.png" alt="Ship">
             </div>
             <h1 class="brand-name">BlueWave</h1>
             <p class="welcome-text">Добро пожаловать в мессенджер</p>
@@ -120,41 +23,31 @@
         </div>
     </div>
 
-    <div id="chat">
+    <div id="chat" style="display: none;">
         <div class="app-container">
             <div class="sidebar">
                 <div class="sidebar-header">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h2 style="color: #0056b3;">BlueWave</h2>
-                        <div id="settings-btn" style="cursor: pointer; font-size: 20px;">⚙️</div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <h3 style="color: #0056b3;">BlueWave</h3>
+                        <div id="settings-btn" style="cursor: pointer;">⚙️</div>
                     </div>
-                    <div id="my-id-display">Загрузка ID...</div>
-                    <input type="text" id="search-input" placeholder="Поиск в контактах...">
+                    <div id="my-id-display">Ваш ID: ...</div>
+                    <input type="text" id="search-input" placeholder="Поиск по ID...">
                 </div>
-
                 <div class="section-title">Группы</div>
                 <div class="user-item" id="global-group">
                     <div class="mini-cube" style="background: #00c853;"></div> 
                     <span>BlueWave Group</span>
                 </div>
-
                 <div class="section-title">Контакты</div>
-                <div id="user-list">
-                    </div>
+                <div id="user-list"></div>
             </div>
-
             <div class="chat-main">
-                <div class="chat-header">
-                    <span id="target-user-name">Выберите чат</span>
-                </div>
-                <div id="messages">
-                    <div id="chat-welcome" style="text-align: center; color: #aaa; margin-top: 50px;">
-                        Выберите контакт или группу, чтобы начать общение
-                    </div>
-                </div>
+                <div class="chat-header"><span id="target-user-name">Выберите чат</span></div>
+                <div id="messages"><div id="chat-welcome">Выберите чат для общения</div></div>
                 <div class="message-input-area" id="input-panel" style="display: none;">
                     <input type="text" id="msg-input" placeholder="Введите сообщение...">
-                    <button id="send-btn" class="btn-primary" style="width: auto; padding: 10px 20px;">Отправить</button>
+                    <button id="send-btn">Отправить</button>
                 </div>
             </div>
         </div>
@@ -162,11 +55,10 @@
 
     <div id="settings-modal" class="modal">
         <div class="modal-content">
-            <h3>Добавить по ID</h3>
-            <p style="font-size: 12px; color: gray;">Введите 6-значный ID пользователя</p>
-            <input type="text" id="add-user-id" placeholder="Например: a1b2c3">
+            <h4>Добавить по ID</h4>
+            <input type="text" id="add-user-id" placeholder="Введите 6 символов">
             <button id="confirm-add-btn" class="btn-primary">ДОБАВИТЬ</button>
-            <p id="close-settings" style="margin-top: 15px; cursor: pointer; color: #888; font-size: 13px;">Закрыть</p>
+            <p id="close-settings" style="margin-top: 10px; cursor: pointer; color: gray;">Закрыть</p>
         </div>
     </div>
 

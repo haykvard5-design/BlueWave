@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlueWave Messenger</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="auth">
+        <div class="login-card">
+            <div class="blue-icon-box">
+                <img src="logo.png" alt="Logo">
+            </div>
+            <h1 class="brand-name">BlueWave</h1>
+            <p id="auth-status" class="welcome-text">Добро пожаловать в мессенджер</p>
+            <div class="auth-fields">
+                <input type="text" id="username" placeholder="Логин (например, admin)">
+                <input type="password" id="password" placeholder="Пароль (например, 1234)">
+                <button id="main-btn" class="btn-primary">ВОЙТИ</button>
+            </div>
+            <p class="toggle-mode" id="toggle-auth">Зарегистрироваться</p>
+        </div>
+    </div>
+
+    <div id="chat" style="display: none;">
+        <div class="app-container">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 style="color: #0056b3;">BlueWave</h2>
+                        <div id="settings-btn" style="cursor: pointer;">⚙️</div>
+                    </div>
+                    <div id="my-id-display">Ваш ID: ...</div>
+                    <input type="text" id="search-input" placeholder="Поиск по ID...">
+                </div>
+                <div class="section-title">Группы</div>
+                <div class="user-item" id="global-group">
+                    <div class="mini-cube" style="background: #00c853;"></div> 
+                    <span>BlueWave Group</span>
+                </div>
+                <div class="section-title">Контакты</div>
+                <div id="user-list"></div>
+            </div>
+            <div class="chat-main">
+                <div class="chat-header"><span id="target-user-name">Выберите чат</span></div>
+                <div id="messages"><div id="chat-welcome">Выберите чат для начала общения</div></div>
+                <div class="message-input-area" id="input-panel" style="display: none;">
+                    <input type="text" id="msg-input" placeholder="Введите сообщение...">
+                    <button id="send-btn">Отправить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <h3>Добавить контакт</h3>
+            <input type="text" id="add-user-id" placeholder="Введите 6 символов ID">
+            <button id="confirm-add-btn" class="btn-primary">ДОБАВИТЬ</button>
+            <p id="close-settings" style="margin-top: 15px; cursor: pointer; color: gray;">Закрыть</p>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

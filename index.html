@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,273 +7,60 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Login Screen -->
-    <div id="loginScreen" class="login-screen active">
+    <div id="auth">
         <div class="login-card">
-            <div class="login-header">
-                <h1>BlueWave</h1>
-                <p id="loginSubtitle">Connect instantly, message securely</p>
+            <div class="blue-icon-box">
+                <img src="logo.png" alt="Logo">
             </div>
-            
-            <div class="auth-toggle">
-                <button id="loginTab" class="auth-tab active" data-mode="login">
-                    <span id="loginTabText">Login</span>
-                </button>
-                <button id="registerTab" class="auth-tab" data-mode="register">
-                    <span id="registerTabText">Register</span>
-                </button>
+            <h1 class="brand-name">BlueWave</h1>
+            <p id="auth-status" class="welcome-text">Добро пожаловать в мессенджер</p>
+            <div class="auth-fields">
+                <input type="text" id="username" placeholder="Логин (например, admin)">
+                <input type="password" id="password" placeholder="Пароль (например, 1234)">
+                <button id="main-btn" class="btn-primary">ВОЙТИ</button>
             </div>
-
-            <form id="authForm" class="auth-form">
-                <div class="form-group">
-                    <input 
-                        type="text" 
-                        id="username" 
-                        placeholder="Username (3-20 characters)" 
-                        required
-                    >
-                </div>
-                <div class="form-group">
-                    <input 
-                        type="password" 
-                        id="password" 
-                        placeholder="Password (4-50 characters)" 
-                        required
-                    >
-                </div>
-                <button type="submit" id="authButton" class="auth-button">
-                    <span id="authButtonText">Login</span>
-                </button>
-            </form>
-
-            <div id="authError" class="auth-error"></div>
+            <p class="toggle-mode" id="toggle-auth">Зарегистрироваться</p>
         </div>
-    </body>
     </div>
 
-    <!-- Main Chat Screen -->
-    <div id="chatScreen" class="chat-screen">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <div class="app-title">
-                    <h2>BlueWave</h2>
-                    <button id="settingsBtn" class="settings-btn" title="Settings">⚙️</button>
+    <div id="chat" style="display: none;">
+        <div class="app-container">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h2 style="color: #0056b3;">BlueWave</h2>
+                        <div id="settings-btn" style="cursor: pointer;">⚙️</div>
+                    </div>
+                    <div id="my-id-display">Ваш ID: ...</div>
+                    <input type="text" id="search-input" placeholder="Поиск по ID...">
                 </div>
-                <input 
-                    type="text" 
-                    id="searchInput" 
-                    class="search-box" 
-                    placeholder="Search ID or name..."
-                >
-            </div>
-
-            <div class="contacts-container">
-                <div id="contactsList" class="contacts-list"></div>
-            </div>
-        </div>
-
-        <!-- Main Chat Area -->
-        <div class="chat-container">
-            <div class="chat-header">
-                <div class="chat-info">
-                    <h3 id="chatTitle">Welcome</h3>
-                    <p id="chatStatus">Select a contact to start chatting</p>
+                <div class="section-title">Группы</div>
+                <div class="user-item" id="global-group">
+                    <div class="mini-cube" style="background: #00c853;"></div> 
+                    <span>BlueWave Group</span>
                 </div>
-                <div class="chat-controls">
-                    <button id="callBtn" class="call-btn" title="Audio Call">📞</button>
-                    <button id="videoBtn" class="call-btn" title="Video Call">📹</button>
-                </div>
+                <div class="section-title">Контакты</div>
+                <div id="user-list"></div>
             </div>
-
-            <div id="messagesContainer" class="messages-container"></div>
-
-            <div class="input-area">
-                <button id="imageBtn" class="input-btn">🖼️</button>
-                <input 
-                    type="file" 
-                    id="imageInput" 
-                    accept="image/*" 
-                    style="display: none"
-                >
-                <input 
-                    type="text" 
-                    id="messageInput" 
-                    class="message-input" 
-                    placeholder="Type a message..."
-                >
-                <button id="sendBtn" class="send-btn">Send</button>
+            <div class="chat-main">
+                <div class="chat-header"><span id="target-user-name">Выберите чат</span></div>
+                <div id="messages"><div id="chat-welcome">Выберите чат для начала общения</div></div>
+                <div class="message-input-area" id="input-panel" style="display: none;">
+                    <input type="text" id="msg-input" placeholder="Введите сообщение...">
+                    <button id="send-btn">Отправить</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="modal">
+    <div id="settings-modal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="settingsTitle">Settings</h2>
-                <button class="modal-close" data-modal="settingsModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="settings-items-container">
-                    <div class="settings-item">
-                        <div class="settings-icon">🌐</div>
-                        <div class="settings-info">
-                            <div class="settings-name" id="languageName">Language</div>
-                            <div class="settings-description" id="languageDesc">English</div>
-                        </div>
-                        <div class="settings-arrow">→</div>
-                    </div>
-
-                    <div class="settings-item">
-                        <div class="settings-icon">👤</div>
-                        <div class="settings-info">
-                            <div class="settings-name" id="profileName">Profile</div>
-                            <div class="settings-description" id="profileDesc">Manage your ID</div>
-                        </div>
-                        <div class="settings-arrow">→</div>
-                    </div>
-
-                    <div class="settings-item">
-                        <div class="settings-icon">ℹ️</div>
-                        <div class="settings-info">
-                            <div class="settings-name" id="aboutName">About</div>
-                            <div class="settings-description" id="aboutDesc">Version 1.0.0</div>
-                        </div>
-                        <div class="settings-arrow">→</div>
-                    </div>
-                </div>
-            </div>
+            <h3>Добавить контакт</h3>
+            <input type="text" id="add-user-id" placeholder="Введите 6 символов ID">
+            <button id="confirm-add-btn" class="btn-primary">ДОБАВИТЬ</button>
+            <p id="close-settings" style="margin-top: 15px; cursor: pointer; color: gray;">Закрыть</p>
         </div>
     </div>
-
-    <!-- Language Selection Modal -->
-    <div id="languagesModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="selectLanguageTitle">Select Language</h2>
-                <button class="modal-close modal-back" data-back-to="settingsModal">&larr;</button>
-            </div>
-            <div class="modal-body">
-                <div class="languages-container">
-                    <div class="language-option" data-lang="en">
-                        <div class="language-flag">🇬🇧</div>
-                        <div class="language-names">
-                            <div class="language-name">English</div>
-                            <div class="language-native">English</div>
-                        </div>
-                        <span class="language-check" id="check-en"></span>
-                    </div>
-
-                    <div class="language-option" data-lang="ru">
-                        <div class="language-flag">🇷🇺</div>
-                        <div class="language-names">
-                            <div class="language-name">Russian</div>
-                            <div class="language-native">Русский</div>
-                        </div>
-                        <span class="language-check" id="check-ru"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Profile Modal -->
-    <div id="profileModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="profileModalTitle">Profile</h2>
-                <button class="modal-close modal-back" data-back-to="settingsModal">&larr;</button>
-            </div>
-            <div class="modal-body">
-                <!-- Profile Display -->
-                <div class="profile-section">
-                    <div class="profile-avatar">👤</div>
-                    <div class="profile-display">
-                        <div class="profile-username" id="profileUsername">User</div>
-                        <div class="profile-id" id="profileId">ID: ABC123</div>
-                    </div>
-                </div>
-
-                <!-- Change ID Section -->
-                <div class="profile-subsection">
-                    <div class="subsection-title" id="changeIdTitle">Change ID</div>
-                    <div class="input-group">
-                        <input 
-                            type="text" 
-                            id="changeIdInput" 
-                            class="profile-input" 
-                            placeholder="New ID (3-6 characters)"
-                        >
-                        <button id="changeIdBtn" class="profile-action-btn" id="changeIdBtnText">Change</button>
-                    </div>
-                    <div id="changeIdError" class="error-message"></div>
-                </div>
-
-                <!-- Add Contact Section -->
-                <div class="profile-subsection">
-                    <div class="subsection-title" id="addContactTitle">Add Contact</div>
-                    <div class="input-group">
-                        <input 
-                            type="text" 
-                            id="addContactInput" 
-                            class="profile-input" 
-                            placeholder="Enter user ID"
-                        >
-                        <button id="addContactBtn" class="profile-action-btn" id="addContactBtnText">Add</button>
-                    </div>
-                    <div id="addContactError" class="error-message"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Call Interface Modal -->
-    <div id="callModal" class="modal">
-        <div class="modal-content call-modal-content">
-            <div class="call-interface">
-                <div class="video-container">
-                    <div class="video-section">
-                        <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
-                        <div class="call-info">
-                            <h3 id="callWithName">Calling...</h3>
-                            <p id="callStatus">Connecting...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="local-video-container">
-                    <video id="localVideo" class="local-video" autoplay playsinline muted></video>
-                </div>
-
-                <div class="call-controls">
-                    <button id="toggleMicBtn" class="control-btn" title="Mute Microphone">🎤</button>
-                    <button id="toggleCameraBtn" class="control-btn" title="Turn Off Camera">📹</button>
-                    <button id="toggleScreenBtn" class="control-btn" title="Share Screen">🖥️</button>
-                    <button id="endCallBtn" class="control-btn end-btn" title="End Call">📵</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Incoming Call Notification -->
-    <div id="incomingCallModal" class="modal">
-        <div class="modal-content incoming-call-content">
-            <div class="incoming-call-container">
-                <div class="incoming-call-avatar">👤</div>
-                <h2 id="incomingCallName">Incoming Call</h2>
-                <p id="incomingCallType">Audio Call</p>
-                
-                <div class="incoming-call-buttons">
-                    <button id="acceptCallBtn" class="accept-btn">Accept</button>
-                    <button id="declineCallBtn" class="decline-btn">Decline</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Friend Request Notification -->
-    <div id="friendRequestsContainer" class="friend-requests-container"></div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>

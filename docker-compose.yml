@@ -1,0 +1,60 @@
+// Docker Compose для быстрого запуска PostgreSQL локально
+
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: bluewave-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bluewave_messenger
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - bluewave
+
+  adminer:
+    image: adminer:latest
+    container_name: bluewave-adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - bluewave
+
+  redis:
+    image: redis:7-alpine
+    container_name: bluewave-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - bluewave
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  bluewave:
+    driver: bridge
+
+# Usage:
+# docker-compose up -d
+# 
+# PostgreSQL: localhost:5432
+# Adminer (UI): http://localhost:8080
+# Redis: localhost:6379

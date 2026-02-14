@@ -11,7 +11,8 @@ import { User } from '@/modules/users/entities/user.entity';
 import { Chat } from '@/modules/chats/entities/chat.entity';
 
 @Entity('messages')
-@Index(['chatId', 'createdAt'], { order: { createdAt: 'DESC' } })
+// TypeORM 0.3+: составной индекс через объект (order в опциях может не поддерживаться в декораторе — используем columns)
+@Index(['chatId', 'createdAt'])
 @Index(['senderId'])
 @Index(['status'])
 export class Message {

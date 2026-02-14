@@ -67,8 +67,9 @@ export class AuthService {
 
   private generateToken(user: User) {
     const payload = { sub: user.id, email: user.email };
+    // Приводим к string для совместимости с типом signOptions.expiresIn (string | number)
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: process.env.JWT_EXPIRATION || '24h',
+      expiresIn: String(process.env.JWT_EXPIRATION || '24h'),
     });
 
     return {

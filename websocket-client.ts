@@ -1,5 +1,6 @@
 // Example WebSocket Client Implementation
 // Для использования в Android или браузере
+// Зависимости: socket.io-client, @types/socket.io-client (см. package.json)
 
 import io, { Socket } from 'socket.io-client';
 

@@ -48,10 +48,10 @@ export class ChatsService {
       return existingChat;
     }
 
-    // Create new private chat
+    // Create new private chat (TypeORM: creator — связь ManyToOne, передаём { id }; type — enum)
     const chat = this.chatsRepository.create({
-      type: 'private',
-      creatorId: userId,
+      type: 'private' as const,
+      creator: { id: userId },
       members: [{ id: userId }, { id: recipientId }],
     });
 
@@ -73,10 +73,10 @@ export class ChatsService {
     const { name, avatar, memberIds } = createGroupChatDto;
 
     const chat = this.chatsRepository.create({
-      type: 'group',
+      type: 'group' as const,
       name,
       avatar,
-      creatorId: userId,
+      creator: { id: userId },
     });
 
     const savedChat = await this.chatsRepository.save(chat);
@@ -109,7 +109,7 @@ export class ChatsService {
     return this.chatsRepository
       .createQueryBuilder('chat')
       .leftJoinAndSelect('chat.members', 'members')
-      .leftJainAndSelect('chat.messages', 'messages')
+      .leftJoinAndSelect('chat.messages', 'messages')
       .where((qb) => {
         const subQuery = qb
           .subQuery()

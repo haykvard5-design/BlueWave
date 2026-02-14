@@ -13,7 +13,8 @@ import { User } from '@/modules/users/entities/user.entity';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'secret',
-      signOptions: { expiresIn: process.env.JWT_EXPIRATION || '24h' },
+      // Приводим к string: JWT signOptions.expiresIn ожидает string | number, env может быть undefined
+      signOptions: { expiresIn: String(process.env.JWT_EXPIRATION || '24h') },
     }),
   ],
   providers: [AuthService, JwtStrategy],

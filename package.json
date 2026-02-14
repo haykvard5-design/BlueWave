@@ -1,7 +1,7 @@
 {
   "name": "bluewave-messenger-backend",
   "version": "1.0.0",
-  "description": "Advanced Messenger Backend - NestJS + PostgreSQL + WebSocket",
+  "description": "BlueWave Messenger Backend - NestJS",
   "author": "Developer",
   "private": true,
   "license": "MIT",
@@ -82,5 +82,8 @@
     "moduleNameMapper": {
       "^@/(.*)$": "<rootDir>/$1"
     }
+  },
+  "engines": {
+    "node": "20.x"
   }
 }
